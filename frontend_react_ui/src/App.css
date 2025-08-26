@@ -572,13 +572,51 @@ html::before, body::before, .App::before {
 /* Dashboard summary row and cards (from design notes) */
 .dashboard-summary-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  column-gap: 16px;
+  /* 12-col grid to precisely position and center cards */
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: 24px; /* desktop gap from notes */
   row-gap: 16px;
   align-items: stretch;
   margin-top: 12px;
 }
 
+/* Position helpers based on design notes */
+.card--half {
+  grid-column: span 12; /* default for small screens */
+}
+.card--centerWide {
+  grid-column: span 12; /* default for small screens */
+}
+
+/* Desktop ≥1024px */
+@media (min-width: 1024px) {
+  .card--half {
+    grid-column: span 6; /* half width: columns 1–6 or 7–12 based on DOM order */
+  }
+  /* Centered below: columns 4–9 (span 6 starting at column 4) */
+  .card--centerWide {
+    grid-column: 4 / span 6;
+  }
+}
+
+/* Tablet 768–1023px */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .dashboard-summary-row {
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: 20px;
+  }
+  .card--half {
+    grid-column: span 6;
+  }
+  /* Centered below using 2 / span 10 as recommended */
+  .card--centerWide {
+    grid-column: 2 / span 10;
+  }
+}
+
+/* Mobile <768px stacks naturally via default spans above */
+
+/* Summary card visual styles */
 .summary-card {
   background: var(--card-bg, #ffffff);
   border-radius: 14px;
@@ -588,6 +626,7 @@ html::before, body::before, .App::before {
   flex-direction: column;
   gap: 10px;
   min-height: 118px;
+  border: 1px solid var(--border-subtle, #EAEAEA);
 }
 
 /* header lines */
@@ -637,6 +676,7 @@ html::before, body::before, .App::before {
 }
 .summary-card__link:hover {
   filter: brightness(0.9);
+  text-decoration: underline;
 }
 
 .summary-card__value {

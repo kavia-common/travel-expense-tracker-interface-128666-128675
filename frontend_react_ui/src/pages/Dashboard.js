@@ -131,26 +131,42 @@ export default function Dashboard() {
           </div>
 
           {/* Summary stat cards row using dedicated grid and capsules per design notes */}
-          <section className="dashboard-summary-row">
-            {/* Card 1 */}
-            <div className="summary-card card" aria-live="polite">
-              <h3 className="summary-card__title">Total Budget vs. Spent</h3>
+          <section className="dashboard-summary-row" aria-label="Overview summary cards">
+            {/* Card 1: Total Budget vs Spent (left, row 1) */}
+            <div className="summary-card card card--half" aria-live="polite" role="region" aria-labelledby="tbvs-title">
+              <h3 id="tbvs-title" className="summary-card__title">Total Budget vs. Spent</h3>
               <p className="summary-card__meta">
                 Budget {formatCurrency(totalBudget)}, Spent{" "}
                 <strong style={{ color: "var(--accent-red, #D32F2F)" }}>
                   {formatCurrency(spentTotal)}
                 </strong>
               </p>
-              <div className="summary-card__capsule">
+              <div className="summary-card__capsule" aria-label={`Utilization ${totalUtilizationPct}%`}>
                 <span className="summary-card__label">Utilization</span>
                 <span className="summary-card__link" style={{ visibility: "hidden" }}>–</span>
                 <span className="summary-card__value">{totalUtilizationPct}%</span>
               </div>
             </div>
 
-            {/* Card 2 */}
-            <div className="summary-card card">
-              <h3 className="summary-card__title">Remaining Funds</h3>
+            {/* Card 2: Daily Allowance vs Spent (right, row 1 after swap) */}
+            <div className="summary-card card card--half" role="region" aria-labelledby="davs-title">
+              <h3 id="davs-title" className="summary-card__title">Daily Allowance vs. Spent</h3>
+              <p className="summary-card__meta">
+                Daily Allowance {formatCurrency(dailyAllowance)} – Today{" "}
+                <strong style={{ color: "var(--accent-blue, #1E88E5)" }}>
+                  {formatCurrency(spentToday)}
+                </strong>
+              </p>
+              <div className="summary-card__capsule" aria-label={`Today's utilization ${todaysUtilizationPct}%`}>
+                <span className="summary-card__label">Today’s utilization</span>
+                <span className="summary-card__link" style={{ visibility: "hidden" }}>–</span>
+                <span className="summary-card__value">{todaysUtilizationPct}%</span>
+              </div>
+            </div>
+
+            {/* Card 3: Remaining Funds (centered below row 1) */}
+            <div className="summary-card card card--centerWide" role="region" aria-labelledby="remaining-title">
+              <h3 id="remaining-title" className="summary-card__title">Remaining Funds</h3>
               <p className="summary-card__meta">
                 Remaining{" "}
                 <strong style={{ color: "var(--accent-green, #2E7D32)" }}>
@@ -162,22 +178,6 @@ export default function Dashboard() {
                 <span className="summary-card__link">On Track</span>
                 {/* placeholder keeps right edge aligned across row */}
                 <span className="summary-card__value summary-card__value--placeholder">00%</span>
-              </div>
-            </div>
-
-            {/* Card 3 */}
-            <div className="summary-card card">
-              <h3 className="summary-card__title">Daily Allowance vs. Spent</h3>
-              <p className="summary-card__meta">
-                Daily Allowance {formatCurrency(dailyAllowance)} – Today{" "}
-                <strong style={{ color: "var(--accent-blue, #1E88E5)" }}>
-                  {formatCurrency(spentToday)}
-                </strong>
-              </p>
-              <div className="summary-card__capsule">
-                <span className="summary-card__label">Today’s utilization</span>
-                <span className="summary-card__link" style={{ visibility: "hidden" }}>–</span>
-                <span className="summary-card__value">{todaysUtilizationPct}%</span>
               </div>
             </div>
           </section>
