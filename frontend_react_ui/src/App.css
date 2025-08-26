@@ -54,16 +54,12 @@ html, body, #root, .App {
   margin: 0 auto;
 }
 
-/* Hero */
+/* Hero (top-aligned intro) */
 .hero {
   position: relative;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px 0;
+  padding: 36px 0 20px;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.98) 45%, rgba(255,255,255,1) 100%),
+    linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.98) 60%, rgba(255,255,255,1) 100%),
     url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=2069&auto=format&fit=crop') center/cover no-repeat;
   border-bottom: 1px solid var(--gray-100);
 }
@@ -71,7 +67,6 @@ html, body, #root, .App {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 8px;
 }
 
@@ -149,8 +144,8 @@ html, body, #root, .App {
   justify-content: center;
   position: relative;
   z-index: 2;
-  margin-top: 16px;
-  padding: 0 12px;
+  margin: -10px auto 0; /* Slight overlap feel with hero, but top aligned on page */
+  padding: 0 12px 8px;
 }
 
 .card {
