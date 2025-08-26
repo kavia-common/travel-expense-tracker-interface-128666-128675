@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo } from "react";
 import "../App.css";
-import RemainingFundsPieChart from "../components/RemainingFundsPieChart";
 
 /**
  * Dashboard page shows overview of budget vs. spending with minimal card UI.
@@ -174,10 +173,11 @@ export default function Dashboard() {
                   {formatCurrency(remaining)}
                 </strong>
               </p>
-
-              {/* Visualization: Donut chart with legend per design notes */}
-              <div className="card" style={{ padding: 12, borderRadius: 12, boxShadow: "none", border: "1px dashed var(--border-dashed, #BDBDBD)" }}>
-                <RemainingFundsPieChart budget={totalBudget} spent={spentTotal} />
+              <div className="summary-card__capsule">
+                <span className="summary-card__label">Condition</span>
+                <span className="summary-card__link">On Track</span>
+                {/* placeholder keeps right edge aligned across row */}
+                <span className="summary-card__value summary-card__value--placeholder">00%</span>
               </div>
             </div>
           </section>

@@ -15,11 +15,6 @@
   --pink: #f43f5e;   /* activities */
   --blue: #3b82f6;   /* dates */
 
-  /* pie colors (fallbacks for chart) */
-  --pie-remaining: var(--green);
-  --pie-spent: var(--blue);
-  --pie-overbudget: var(--pink);
-
   /* Base tones for backgrounds and overlays */
   --bg: var(--white);
   --text: var(--black);
