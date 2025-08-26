@@ -166,7 +166,7 @@ export default function Dashboard() {
               </p>
               <div className="summary" style={{ marginTop: 10 }}>
                 <div className="summary-row">
-                  <span className="summary-label">Today’s Utilization</span>
+                  <span className="summary-label">Today’s utilization</span>
                   <span className="summary-value">
                     {Math.round((spentToday / dailyAllowance) * 100)}%
                   </span>

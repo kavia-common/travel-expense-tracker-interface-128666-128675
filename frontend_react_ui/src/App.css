@@ -378,9 +378,12 @@ html::before, body::before, .App::before {
 }
 
 .summary-row {
-  display: flex;
+  /* Use grid so labels and values line up perfectly across cards */
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
 }
 
 .summary-label {
