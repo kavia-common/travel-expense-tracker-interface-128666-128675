@@ -4,67 +4,32 @@
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#1A1A1A" />
+    <meta name="theme-color" content="#ffffff" />
     <meta
       name="description"
-      content="KAVIA AI Application"
+      content="Travel Expense Tracker - clean, modern UI"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <!-- Load Inter font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <title>KAVIA App</title>
+    <title>Travel Expense Tracker</title>
     <style>
-      :root {
-        /* Expose CRA's PUBLIC_URL to CSS via a runtime-safe variable */
-        --public-url: %PUBLIC_URL%;
-      }
-      /* Global background applied at document level to avoid webpack URL resolution from src CSS */
-      html, body, #root, .App {
+      /* Global background image served from CRA public directory */
+      html {
+        background-image: url('/background.svg');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        background-color: #ffffff;
         min-height: 100%;
-        background-image:
-          url(%PUBLIC_URL%/background.svg),
-          radial-gradient(1200px 800px at 10% -10%, rgba(255,214,0,0.06), transparent 60%),
-          radial-gradient(1000px 700px at 90% -20%, rgba(59,130,246,0.06), transparent 60%),
-          radial-gradient(800px 500px at 50% -40%, rgba(10,10,10,0.04), transparent 60%),
-          #ffffff;
-        background-position: center top, center, center, center, center;
-        background-size: cover, auto, auto, auto, auto;
-        background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-        background-attachment: fixed, scroll, scroll, scroll, scroll;
-        color: #0a0a0a;
-        position: relative;
-        isolation: isolate;
+      }
+      body, #root {
+        min-height: 100%;
+        margin: 0;
+        background: transparent;
       }
     </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
   </body>
 </html>

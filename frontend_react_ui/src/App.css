@@ -42,6 +42,11 @@
   box-sizing: border-box;
 }
 
+/* Keep body transparent; global background is defined in public/index.html */
+body {
+  background: transparent;
+}
+
 html, body, #root, .App {
   min-height: 100%;
   color: var(--text);
@@ -49,16 +54,18 @@ html, body, #root, .App {
   isolation: isolate; /* ensure overlays stack nicely */
 }
 
-html::before, body::before, .App::before {
-  /* ultra subtle grain to unify layers */
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image: var(--bg-noise);
-  background-size: 140px 140px;
-  pointer-events: none;
-  z-index: -1;
+/* Global background image set from CRA public directory on the root element.
+   Keeping this on html helps avoid any side-effects from other body styles. */
+html {
+  background-image: url(/background.svg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  background-color: #ffffff;
 }
+
+/* Removed noise overlay to ensure the SVG background remains clearly visible */
 
 .travel {
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
