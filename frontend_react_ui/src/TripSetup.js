@@ -305,6 +305,9 @@ export default function TripSetup() {
             <button type="submit" className="btn-primary">
               Save Trip
             </button>
+            <a className="btn-secondary" href="/expenses" title="Log an Expense">
+              Quick Log Expense →
+            </a>
             <a className="btn-secondary" href="/dashboard" title="Go to Dashboard">
               View Dashboard →
             </a>
