@@ -29,6 +29,29 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>KAVIA App</title>
+    <style>
+      :root {
+        /* Expose CRA's PUBLIC_URL to CSS via a runtime-safe variable */
+        --public-url: %PUBLIC_URL%;
+      }
+      /* Global background applied at document level to avoid webpack URL resolution from src CSS */
+      html, body, #root, .App {
+        min-height: 100%;
+        background-image:
+          url(%PUBLIC_URL%/background.svg),
+          radial-gradient(1200px 800px at 10% -10%, rgba(255,214,0,0.06), transparent 60%),
+          radial-gradient(1000px 700px at 90% -20%, rgba(59,130,246,0.06), transparent 60%),
+          radial-gradient(800px 500px at 50% -40%, rgba(10,10,10,0.04), transparent 60%),
+          #ffffff;
+        background-position: center top, center, center, center, center;
+        background-size: cover, auto, auto, auto, auto;
+        background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+        background-attachment: fixed, scroll, scroll, scroll, scroll;
+        color: #0a0a0a;
+        position: relative;
+        isolation: isolate;
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
