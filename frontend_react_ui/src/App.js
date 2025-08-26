@@ -1,372 +1,50 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import './App.css';
+import React from "react";
+import "./App.css";
+import TripSetup from "./TripSetup";
+import Dashboard from "./pages/Dashboard";
+import NavBar from "./components/NavBar";
 
 /**
- * Minimal travel expense tracker UI
- * - Top-aligned intro with "Trip Setup"
- * - Subtle background photo
- * - Main filter/input card labeled "Your Trip" directly below
- * - Bold black headings, gray subtext, accent highlights
+ * Root with minimal client-side routing by path prefix.
+ * Avoids external dependencies while enabling navigation between pages.
  */
-
-// Accent chips component for a bit of color and guidance
-function AccentLegend() {
-  return (
-    <div className="accent-legend" aria-hidden="true">
-      <span className="chip chip-yellow">Budget</span>
-      <span className="chip chip-green">Savings</span>
-      <span className="chip chip-pink">Activities</span>
-      <span className="chip chip-blue">Dates</span>
-    </div>
-  );
-}
 
 // PUBLIC_INTERFACE
 export default function App() {
-  /** UI state for trip setup form */
-  const [tripName, setTripName] = useState('');
-  const [totalBudget, setTotalBudget] = useState(1500);
-  const [dailyBudget, setDailyBudget] = useState(120);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  // Friends UI state
-  const [friendInput, setFriendInput] = useState('');
-  const [friends, setFriends] = useState([]);
+  const [path, setPath] = React.useState(window.location.pathname);
 
-  // Accessibility: announce changes (simple demo via title)
-  useEffect(() => {
-    document.title = `Trip Setup${tripName ? ` - ${tripName}` : ''}`;
-  }, [tripName]);
+  React.useEffect(() => {
+    const onPop = () => setPath(window.location.pathname);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
-  const tripSummary = useMemo(() => {
-    const days =
-      startDate && endDate
-        ? Math.max(
-            0,
-            Math.ceil(
-              (new Date(endDate).getTime() - new Date(startDate).getTime()) /
-                (1000 * 60 * 60 * 24)
-            )
-          )
-        : 0;
-    const estTotal = days > 0 ? dailyBudget * days : totalBudget;
-    return { days, estTotal };
-  }, [startDate, endDate, dailyBudget, totalBudget]);
+  // Intercept nav clicks for internal routes
+  React.useEffect(() => {
+    const handler = (e) => {
+      const a = e.target.closest("a[href]");
+      if (!a) return;
+      const url = new URL(a.href);
+      const sameOrigin = url.origin === window.location.origin;
+      if (sameOrigin && !a.hasAttribute("data-external")) {
+        e.preventDefault();
+        if (url.pathname !== window.location.pathname) {
+          window.history.pushState({}, "", url.pathname);
+          setPath(url.pathname);
+        }
+      }
+    };
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, []);
 
-  const incrementDaily = () => setDailyBudget((v) => Math.min(10000, v + 10));
-  const decrementDaily = () => setDailyBudget((v) => Math.max(0, v - 10));
-
-  const formatCurrency = (n) =>
-    new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0,
-    }).format(n || 0);
-
-  // Helpers for friends input
-  const normalized = (s) => s.trim().replace(/\s+/g, ' ');
-  const isValidFriend = (s) => normalized(s).length > 0;
-
-  // PUBLIC_INTERFACE
-  const addFriend = () => {
-    const value = normalized(friendInput);
-    if (!isValidFriend(value)) return;
-    if (friends.includes(value)) {
-      setFriendInput('');
-      return;
-    }
-    setFriends((prev) => [...prev, value]);
-    setFriendInput('');
-  };
-
-  // PUBLIC_INTERFACE
-  const removeFriend = (name) => {
-    setFriends((prev) => prev.filter((f) => f !== name));
-  };
-
-  // PUBLIC_INTERFACE
-  const handleFriendKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      addFriend();
-    } else if (e.key === 'Backspace' && friendInput === '' && friends.length) {
-      // quick remove last chip when input is empty
-      removeFriend(friends[friends.length - 1]);
-    }
-  };
-
-  // PUBLIC_INTERFACE
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert(
-      `Trip saved:
-- Name: ${tripName || '(untitled)'}
-- Dates: ${startDate || 'N/A'} to ${endDate || 'N/A'} (${tripSummary.days} days)
-- Daily Budget: ${formatCurrency(dailyBudget)}
-- Total Budget: ${formatCurrency(totalBudget)}
-- Est. Total: ${formatCurrency(tripSummary.estTotal)}
-- Friends: ${friends.length ? friends.join(', ') : 'None'}`
-    );
-  };
+  let Page = TripSetup;
+  if (path.startsWith("/dashboard")) Page = Dashboard;
 
   return (
     <div className="App travel">
-      {/* Top Section (Intro) */}
-      <section className="hero">
-        <div className="hero-overlay" />
-        <div className="hero-content container">
-          <h1 className="headline">Trip Setup</h1>
-          <p className="subtext">
-            Plan your travel budget with clarity. Set your trip details, daily
-            spending goals, and dates. Clean, simple, and flexible.
-          </p>
-          <AccentLegend />
-        </div>
-      </section>
-
-      {/* Main filter/input card directly below intro */}
-      <div className="floating-card-wrapper">
-        <form className="card floating-card" onSubmit={handleSubmit}>
-          <div className="card-header">
-            <h2 className="card-title">Your Trip</h2>
-            <p className="card-subtext">
-              Configure the essentials. You can adjust everything later.
-            </p>
-          </div>
-
-          <div className="inputs-grid">
-            {/* Trip Name */}
-            <div className="field">
-              <label className="label">
-                Trip name
-                <span className="dot dot-pink" />
-              </label>
-              <input
-                type="text"
-                className="input"
-                placeholder="e.g., Summer in Spain"
-                value={tripName}
-                onChange={(e) => setTripName(e.target.value)}
-                aria-label="Trip name"
-              />
-              <small className="hint">A short title to recognize your trip.</small>
-            </div>
-
-            {/* Total Budget */}
-            <div className="field">
-              <label className="label">
-                Total budget
-                <span className="dot dot-yellow" />
-              </label>
-              <div className="input-with-prefix">
-                <span className="prefix">$</span>
-                <input
-                  type="number"
-                  className="input"
-                  min={0}
-                  step={50}
-                  placeholder="1500"
-                  value={totalBudget}
-                  onChange={(e) => setTotalBudget(Number(e.target.value))}
-                  aria-label="Total budget"
-                />
-              </div>
-              <small className="hint">
-                The maximum you want to spend for the entire trip.
-              </small>
-            </div>
-
-            {/* Daily Budget Clicker */}
-            <div className="field">
-              <label className="label">
-                Daily budget
-                <span className="dot dot-green" />
-              </label>
-              <div className="clicker">
-                <button
-                  type="button"
-                  className="btn-ghost"
-                  onClick={decrementDaily}
-                  aria-label="Decrease daily budget"
-                >
-                  −
-                </button>
-                <div className="clicker-display" aria-live="polite">
-                  {formatCurrency(dailyBudget)}
-                </div>
-                <button
-                  type="button"
-                  className="btn-ghost"
-                  onClick={incrementDaily}
-                  aria-label="Increase daily budget"
-                >
-                  +
-                </button>
-              </div>
-              <small className="hint">
-                Your ideal spending limit per day.
-              </small>
-            </div>
-
-            {/* Start Date */}
-            <div className="field">
-              <label className="label">
-                Start date
-                <span className="dot dot-blue" />
-              </label>
-              <input
-                type="date"
-                className="input"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                aria-label="Start date"
-              />
-              <small className="hint">When your trip begins.</small>
-            </div>
-
-            {/* End Date */}
-            <div className="field">
-              <label className="label">
-                End date
-                <span className="dot dot-blue" />
-              </label>
-              <input
-                type="date"
-                className="input"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                aria-label="End date"
-              />
-              <small className="hint">When your trip finishes.</small>
-            </div>
-
-            {/* Add Friends */}
-            <div className="field friends-field">
-              <label className="label">
-                Add friends
-                <span className="dot dot-green" />
-              </label>
-              <div className="friends-input-wrap">
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Type a name or email, then press Enter"
-                  value={friendInput}
-                  onChange={(e) => setFriendInput(e.target.value)}
-                  onKeyDown={handleFriendKeyDown}
-                  aria-label="Add friend by name or email"
-                />
-                <button
-                  type="button"
-                  className="btn-ghost friends-add-btn"
-                  onClick={addFriend}
-                  aria-label="Add friend"
-                  title="Add friend"
-                >
-                  +
-                </button>
-              </div>
-
-              {friends.length > 0 && (
-                <div className="friends-chips" aria-live="polite">
-                  {friends.map((f) => (
-                    <span key={f} className="chip chip-friend" role="listitem">
-                      <span className="chip-avatar" aria-hidden="true">
-                        👥
-                      </span>
-                      <span className="chip-text">{f}</span>
-                      <button
-                        type="button"
-                        className="chip-remove"
-                        aria-label={`Remove ${f}`}
-                        onClick={() => removeFriend(f)}
-                        title="Remove"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-              <small className="hint">
-                Invite friends to split costs. We’ll show per-person shares later.
-              </small>
-            </div>
-          </div>
-
-          <div className="summary card">
-            <div className="summary-row">
-              <span className="summary-label">Duration</span>
-              <span className="summary-value">
-                {tripSummary.days} {tripSummary.days === 1 ? 'day' : 'days'}
-              </span>
-            </div>
-            <div className="summary-row">
-              <span className="summary-label">Daily budget</span>
-              <span className="summary-value">{formatCurrency(dailyBudget)}</span>
-            </div>
-            <div className="summary-row">
-              <span className="summary-label">Planned total</span>
-              <span className="summary-value accent">{formatCurrency(tripSummary.estTotal)}</span>
-            </div>
-            {friends.length > 0 && (
-              <div className="summary-row">
-                <span className="summary-label">Group size</span>
-                <span className="summary-value">{friends.length + 1} travelers</span>
-              </div>
-            )}
-          </div>
-
-          <div className="actions">
-            <button type="submit" className="btn-primary">
-              Save Trip
-            </button>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => {
-                setTripName('');
-                setTotalBudget(1500);
-                setDailyBudget(120);
-                setStartDate('');
-                setEndDate('');
-                setFriends([]);
-                setFriendInput('');
-              }}
-            >
-              Reset
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* Content section placeholder for future expansion */}
-      <section className="container info-cards">
-        <div className="info-card card">
-          <h3 className="info-title">Track Expenses</h3>
-          <p className="info-text">
-            Add expenses as you go and compare against your daily budget.
-          </p>
-        </div>
-        <div className="info-card card">
-          <h3 className="info-title">Visual Insights</h3>
-          <p className="info-text">
-            See how your spending evolves across categories and days.
-          </p>
-        </div>
-        <div className="info-card card">
-          <h3 className="info-title">Smart Tips</h3>
-          <p className="info-text">
-            Get reminders and suggestions to stay within your plan.
-          </p>
-        </div>
-      </section>
-
-      <footer className="footer container">
-        <p className="footer-text">
-          Designed for clarity and ease. Plan, track, and enjoy your trip.
-        </p>
-      </footer>
+      <NavBar />
+      <Page />
     </div>
   );
 }
