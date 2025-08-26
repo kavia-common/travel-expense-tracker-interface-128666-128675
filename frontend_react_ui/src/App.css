@@ -44,15 +44,25 @@ html, body, #root, .App {
 /* Hero */
 .hero {
   position: relative;
-  min-height: 72vh;
+  /* Fill viewport to enable true vertical centering */
+  min-height: 100vh;
   display: flex;
-  align-items: flex-start;
+  /* Center everything vertically and horizontally */
+  align-items: center;
   justify-content: center;
-  padding-top: 80px;
+  /* Internal spacing for small screens */
+  padding: 24px 0;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.96) 45%, rgba(255,255,255,1) 100%),
     url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=2069&auto=format&fit=crop') center/cover no-repeat;
   border-bottom: 1px solid var(--gray-100);
+}
+.hero .container {
+  /* Make the inner hero area a centered column to group headline + card */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-overlay {
@@ -65,13 +75,18 @@ html, body, #root, .App {
 }
 
 .hero-content {
-  text-align: left;
+  text-align: center;
   z-index: 1;
-  padding-top: 16px;
+  padding-top: 0;
+  padding-left: 16px;
+  padding-right: 16px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .headline {
-  margin: 0 0 8px 0;
+  margin: 0 0 10px 0;
   font-size: clamp(2.4rem, 4vw, 3.5rem);
   line-height: 1.05;
   font-weight: 800;
@@ -80,10 +95,11 @@ html, body, #root, .App {
 }
 
 .subtext {
-  margin: 0;
+  margin: 0 auto;
   max-width: 720px;
   color: var(--gray-500);
   font-size: clamp(1rem, 1.4vw, 1.125rem);
+  text-align: center;
 }
 
 /* Accent legend */
@@ -92,6 +108,7 @@ html, body, #root, .App {
   gap: 10px;
   margin-top: 18px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .chip {
@@ -117,8 +134,11 @@ html, body, #root, .App {
   justify-content: center;
   position: relative;
   z-index: 2;
-  transform: translateY(40px);
-  padding: 0 16px 40px;
+  /* Remove shift-down so it truly centers with the headline block */
+  transform: none;
+  /* Vertical spacing between headline area and card */
+  margin-top: 20px;
+  padding: 0 16px;
 }
 
 .card {
@@ -129,7 +149,7 @@ html, body, #root, .App {
 }
 
 .floating-card {
-  width: min(1100px, 96vw);
+  width: min(900px, 96vw);
   padding: 22px;
 }
 
@@ -344,7 +364,7 @@ html, body, #root, .App {
 
 /* Info cards section */
 .info-cards {
-  margin-top: 80px;
+  margin-top: 40px;
   padding: 16px;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
