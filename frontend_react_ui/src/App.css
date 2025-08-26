@@ -42,30 +42,29 @@
   box-sizing: border-box;
 }
 
-/* Keep body transparent; global background is defined in public/index.html */
-body {
-  background: transparent;
-}
-
 html, body, #root, .App {
-  min-height: 100%;
+  height: 100%;
+  /* Subtle global ambient background with noise for depth */
+  background:
+    var(--bg-grad-1),
+    var(--bg-grad-2),
+    var(--bg-grad-3),
+    var(--bg);
   color: var(--text);
   position: relative;
   isolation: isolate; /* ensure overlays stack nicely */
 }
 
-/* Global background image set from CRA public directory on the root element.
-   Keeping this on html helps avoid any side-effects from other body styles. */
-html {
-  background-image: url(/background.svg);
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-position: center;
-  background-color: #ffffff;
+html::before, body::before, .App::before {
+  /* ultra subtle grain to unify layers */
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: var(--bg-noise);
+  background-size: 140px 140px;
+  pointer-events: none;
+  z-index: -1;
 }
-
-/* Removed noise overlay to ensure the SVG background remains clearly visible */
 
 .travel {
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
@@ -81,9 +80,10 @@ html {
 .hero {
   position: relative;
   padding: 36px 0 56px; /* extra bottom to create soft overlap with card */
-  /* Keep hero minimal; rely on global background, with a soft mist to ensure readability */
   background:
-    radial-gradient(100% 60% at 50% 0%, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.85) 70%, #ffffff 96%);
+    /* soft fog to blend hero with page background */
+    radial-gradient(100% 60% at 50% 0%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.9) 70%, #ffffff 100%),
+    url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=2069&auto=format&fit=crop') center/cover no-repeat;
   border-bottom: 1px solid var(--gray-100);
 }
 .hero .container {
@@ -98,14 +98,14 @@ html {
   position: absolute;
   inset: 0;
   background:
-    /* primary accent bloom (slightly stronger to aid readability) */
-    radial-gradient(60% 60% at 30% 10%, rgba(255,214,0,0.12) 0%, rgba(255,255,255,0) 60%),
+    /* primary accent bloom */
+    radial-gradient(60% 60% at 30% 10%, rgba(255,214,0,0.10) 0%, rgba(255,255,255,0) 60%),
     /* secondary accent bloom */
-    radial-gradient(50% 60% at 80% 0%, rgba(59,130,246,0.12) 0%, rgba(255,255,255,0) 60%),
-    /* ambient vignette to focus content (a bit stronger near top) */
-    radial-gradient(120% 80% at 50% -20%, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.00) 60%);
+    radial-gradient(50% 60% at 80% 0%, rgba(59,130,246,0.10) 0%, rgba(255,255,255,0) 60%),
+    /* ambient vignette to focus content */
+    radial-gradient(120% 80% at 50% -20%, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.00) 60%);
   pointer-events: none;
-  backdrop-filter: blur(0.5px);
+  backdrop-filter: blur(1px);
 }
 
 .hero-content {
