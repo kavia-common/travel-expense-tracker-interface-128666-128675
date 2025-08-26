@@ -3,6 +3,7 @@ import "./App.css";
 import TripSetup from "./TripSetup";
 import Dashboard from "./pages/Dashboard";
 import ExpenseLogging from "./pages/ExpenseLogging";
+import GroupTravel from "./pages/GroupTravel";
 import NavBar from "./components/NavBar";
 import { ExpensesProvider } from "./context/ExpensesContext";
 
@@ -46,6 +47,7 @@ export default function App() {
   let Page = TripSetup;
   if (path.startsWith("/expenses")) Page = ExpenseLogging;
   else if (path.startsWith("/dashboard")) Page = Dashboard;
+  else if (path.startsWith("/group")) Page = GroupTravel;
 
   return (
     <ExpensesProvider>

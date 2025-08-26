@@ -42,6 +42,9 @@ export default function NavBar() {
           <a className="chip" href="/dashboard" title="Dashboard">
             Dashboard
           </a>
+          <a className="chip" href="/group" title="Group Travel Mode">
+            Group
+          </a>
         </div>
       </div>
     </nav>
