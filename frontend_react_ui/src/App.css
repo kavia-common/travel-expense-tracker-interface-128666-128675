@@ -15,9 +15,16 @@
   --pink: #f43f5e;   /* activities */
   --blue: #3b82f6;   /* dates */
 
+  /* Base tones for backgrounds and overlays */
   --bg: var(--white);
   --text: var(--black);
   --muted: #6b7280;
+
+  /* Ambient overlays */
+  --bg-grad-1: radial-gradient(1200px 800px at 10% -10%, rgba(255,214,0,0.06), transparent 60%);
+  --bg-grad-2: radial-gradient(1000px 700px at 90% -20%, rgba(59,130,246,0.06), transparent 60%);
+  --bg-grad-3: radial-gradient(800px 500px at 50% -40%, rgba(10,10,10,0.04), transparent 60%);
+  --bg-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/feGaussianBlur%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
 
   /* Softer, more pronounced roundness and shadow */
   --radius: 20px;
@@ -37,11 +44,26 @@
 
 html, body, #root, .App {
   height: 100%;
+  /* Subtle global ambient background with noise for depth */
   background:
-    radial-gradient(1200px 800px at 10% -10%, rgba(255,214,0,0.06), transparent 60%),
-    radial-gradient(1000px 700px at 90% -20%, rgba(59,130,246,0.06), transparent 60%),
+    var(--bg-grad-1),
+    var(--bg-grad-2),
+    var(--bg-grad-3),
     var(--bg);
   color: var(--text);
+  position: relative;
+  isolation: isolate; /* ensure overlays stack nicely */
+}
+
+html::before, body::before, .App::before {
+  /* ultra subtle grain to unify layers */
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: var(--bg-noise);
+  background-size: 140px 140px;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .travel {
@@ -57,9 +79,10 @@ html, body, #root, .App {
 /* Hero (top-aligned intro) */
 .hero {
   position: relative;
-  padding: 36px 0 20px;
+  padding: 36px 0 56px; /* extra bottom to create soft overlap with card */
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.98) 60%, rgba(255,255,255,1) 100%),
+    /* soft fog to blend hero with page background */
+    radial-gradient(100% 60% at 50% 0%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.9) 70%, #ffffff 100%),
     url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=2069&auto=format&fit=crop') center/cover no-repeat;
   border-bottom: 1px solid var(--gray-100);
 }
@@ -75,9 +98,14 @@ html, body, #root, .App {
   position: absolute;
   inset: 0;
   background:
+    /* primary accent bloom */
     radial-gradient(60% 60% at 30% 10%, rgba(255,214,0,0.10) 0%, rgba(255,255,255,0) 60%),
-    radial-gradient(50% 60% at 80% 0%, rgba(59,130,246,0.10) 0%, rgba(255,255,255,0) 60%);
+    /* secondary accent bloom */
+    radial-gradient(50% 60% at 80% 0%, rgba(59,130,246,0.10) 0%, rgba(255,255,255,0) 60%),
+    /* ambient vignette to focus content */
+    radial-gradient(120% 80% at 50% -20%, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.00) 60%);
   pointer-events: none;
+  backdrop-filter: blur(1px);
 }
 
 .hero-content {
@@ -144,16 +172,20 @@ html, body, #root, .App {
   justify-content: center;
   position: relative;
   z-index: 2;
-  margin: -10px auto 0; /* Slight overlap feel with hero, but top aligned on page */
+  margin: -28px auto 0; /* deeper overlap for cohesion */
   padding: 0 12px 8px;
 }
 
+/* card base with subtle translucency to blend with background */
 .card {
-  background: var(--white);
-  border: 1px solid var(--gray-100);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.96));
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(229, 231, 235, 0.8);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  transition: box-shadow var(--elevate), transform var(--press), border-color var(--elevate);
+  box-shadow: 0 18px 40px rgba(17, 24, 39, 0.10), 0 2px 8px rgba(17,24,39,0.04);
+  transition: box-shadow var(--elevate), transform var(--press), border-color var(--elevate), background var(--elevate);
   will-change: transform;
 }
 .card:hover,
@@ -333,7 +365,8 @@ html, body, #root, .App {
   display: grid;
   gap: 8px;
   border-style: dashed;
-  background: linear-gradient(180deg, rgba(255,214,0,0.05) 0%, rgba(255,255,255,0.7) 100%);
+  background:
+    linear-gradient(180deg, rgba(255,214,0,0.05) 0%, rgba(255,255,255,0.7) 100%);
   border-radius: var(--radius);
   transition: box-shadow var(--elevate), transform var(--press), border-color var(--elevate);
 }
@@ -433,7 +466,9 @@ html, body, #root, .App {
   position: relative;
   overflow: hidden;
   background:
-    linear-gradient(180deg, #ffffff, #fbfbfb);
+    linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,1));
+  backdrop-filter: blur(2px);
+  border: 1px solid var(--gray-100);
 }
 .info-card::after {
   content: "";
