@@ -99,6 +99,10 @@ export default function Dashboard() {
   const formatCurrency = (n) =>
     new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n || 0);
 
+  // Derived percentages
+  const totalUtilizationPct = Math.round((spentTotal / totalBudget) * 100);
+  const todaysUtilizationPct = Math.round((spentToday / dailyAllowance) * 100);
+
   return (
     <div className="App travel">
       {/* Soft hero without photo, consistent spacing */}
@@ -126,55 +130,59 @@ export default function Dashboard() {
             <p className="card-subtext">Quick snapshot of your trip finances.</p>
           </div>
 
-          <section className="info-cards" style={{ marginTop: 12, padding: 0 }}>
-            <div className="info-card card" aria-live="polite">
-              <h3 className="info-title">Total Budget vs. Spent</h3>
-              <p className="info-text">
-                Budget: <strong>{formatCurrency(totalBudget)}</strong> — Spent:{" "}
-                <strong style={{ color: "var(--pink)" }}>{formatCurrency(spentTotal)}</strong>
+          {/* Summary stat cards row using dedicated grid and capsules per design notes */}
+          <section className="dashboard-summary-row">
+            {/* Card 1 */}
+            <div className="summary-card card" aria-live="polite">
+              <h3 className="summary-card__title">Total Budget vs. Spent</h3>
+              <p className="summary-card__meta">
+                Budget {formatCurrency(totalBudget)}, Spent{" "}
+                <strong style={{ color: "var(--accent-red, #D32F2F)" }}>
+                  {formatCurrency(spentTotal)}
+                </strong>
               </p>
-              <div className="summary" style={{ marginTop: 10 }}>
-                <div className="summary-row">
-                  <span className="summary-label">Utilization</span>
-                  <span className="summary-value">
-                    {Math.round((spentTotal / totalBudget) * 100)}%
-                  </span>
-                </div>
+              <div className="summary-card__capsule">
+                <span className="summary-card__label">Utilization</span>
+                <span className="summary-card__link" style={{ visibility: "hidden" }}>–</span>
+                <span className="summary-card__value">{totalUtilizationPct}%</span>
               </div>
             </div>
 
-            <div className="info-card card">
-              <h3 className="info-title">Remaining Funds</h3>
-              <p className="info-text">
-                Remaining: <strong style={{ color: "var(--green)" }}>{formatCurrency(remaining)}</strong>
+            {/* Card 2 */}
+            <div className="summary-card card">
+              <h3 className="summary-card__title">Remaining Funds</h3>
+              <p className="summary-card__meta">
+                Remaining{" "}
+                <strong style={{ color: "var(--accent-green, #2E7D32)" }}>
+                  {formatCurrency(remaining)}
+                </strong>
               </p>
-              <div className="summary" style={{ marginTop: 10 }}>
-                <div className="summary-row">
-                  <span className="summary-label">Cushion</span>
-                  <span className="summary-value accent">
-                    {remaining > 0 ? "On Track" : "Exceeded"}
-                  </span>
-                </div>
+              <div className="summary-card__capsule">
+                <span className="summary-card__label">Condition</span>
+                <span className="summary-card__link">On Track</span>
+                {/* placeholder keeps right edge aligned across row */}
+                <span className="summary-card__value summary-card__value--placeholder">00%</span>
               </div>
             </div>
 
-            <div className="info-card card">
-              <h3 className="info-title">Daily Allowance vs. Spent</h3>
-              <p className="info-text">
-                Daily Allowance: <strong>{formatCurrency(dailyAllowance)}</strong> — Today:{" "}
-                <strong style={{ color: "var(--blue)" }}>{formatCurrency(spentToday)}</strong>
+            {/* Card 3 */}
+            <div className="summary-card card">
+              <h3 className="summary-card__title">Daily Allowance vs. Spent</h3>
+              <p className="summary-card__meta">
+                Daily Allowance {formatCurrency(dailyAllowance)} – Today{" "}
+                <strong style={{ color: "var(--accent-blue, #1E88E5)" }}>
+                  {formatCurrency(spentToday)}
+                </strong>
               </p>
-              <div className="summary" style={{ marginTop: 10 }}>
-                <div className="summary-row">
-                  <span className="summary-label">Today’s utilization</span>
-                  <span className="summary-value">
-                    {Math.round((spentToday / dailyAllowance) * 100)}%
-                  </span>
-                </div>
+              <div className="summary-card__capsule">
+                <span className="summary-card__label">Today’s utilization</span>
+                <span className="summary-card__link" style={{ visibility: "hidden" }}>–</span>
+                <span className="summary-card__value">{todaysUtilizationPct}%</span>
               </div>
             </div>
           </section>
 
+          {/* Category chart card */}
           <div className="card" style={{ marginTop: 16, padding: 16 }}>
             <div className="card-header" style={{ padding: "0 0 8px 0" }}>
               <h3 className="card-title" style={{ fontSize: "1.1rem" }}>Category Breakdown</h3>

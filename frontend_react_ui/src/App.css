@@ -569,6 +569,90 @@ html::before, body::before, .App::before {
   font-size: 0.98rem;
 }
 
+/* Dashboard summary row and cards (from design notes) */
+.dashboard-summary-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  column-gap: 16px;
+  row-gap: 16px;
+  align-items: stretch;
+  margin-top: 12px;
+}
+
+.summary-card {
+  background: var(--card-bg, #ffffff);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 118px;
+}
+
+/* header lines */
+.summary-card__title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--text-strong, #0B0B0B);
+}
+.summary-card__meta {
+  margin: 2px 0 0 0;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--text-muted, #6B6B6B);
+}
+
+/* dashed capsule */
+.summary-card__capsule {
+  border: 2px dashed var(--border-dashed, #BDBDBD);
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* ensures right column exists */
+  align-items: center;
+  column-gap: 10px;
+  height: 44px;
+  background: #fff;
+}
+
+.summary-card__label {
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 14px;
+  color: var(--text-strong, #0B0B0B);
+}
+
+.summary-card__link {
+  justify-self: start;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 14px;
+  color: var(--accent-blue, #1E88E5);
+  cursor: pointer;
+  text-decoration: none;
+}
+.summary-card__link:hover {
+  filter: brightness(0.9);
+}
+
+.summary-card__value {
+  justify-self: end;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 14px;
+  color: var(--text-strong, #0B0B0B);
+}
+
+/* Invisible but space-preserving placeholder to keep right edges aligned */
+.summary-card__value--placeholder {
+  width: 28px; /* tune if needed based on font metrics */
+  visibility: hidden;
+}
+
 /* Footer */
 .footer {
   margin: 26px auto 60px;
