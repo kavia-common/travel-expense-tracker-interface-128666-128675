@@ -9,6 +9,7 @@ import { useExpenses } from "../context/ExpensesContext";
  * - Remaining funds
  * - Daily allowance vs. spent
  * - Category breakdown with a pie chart (Recharts)
+ * - Smart Alerts & Tips (mock AI suggestions)
  *
  * Now connected to the global Expenses store for live updates.
  */
@@ -23,7 +24,7 @@ export default function Dashboard() {
     [expenses]
   );
 
-  // Today’s spending (based on local date string yyyy-mm-dd)
+  // Today’s date string (yyyy-mm-dd)
   const todayStr = useMemo(() => {
     const d = new Date();
     const yyyy = d.getFullYear();
@@ -31,10 +32,29 @@ export default function Dashboard() {
     const dd = String(d.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
   }, []);
+
+  // Today’s spending
   const spentToday = useMemo(
-    () => expenses.filter((e) => e.date === todayStr).reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
+    () =>
+      expenses
+        .filter((e) => e.date === todayStr)
+        .reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
     [expenses, todayStr]
   );
+
+  // Average daily spending based on available history
+  const avgDaily = useMemo(() => {
+    if (expenses.length === 0) return 0;
+    const byDay = new Map();
+    for (const e of expenses) {
+      const key = e.date || "unknown";
+      const amt = Number(e.amount) || 0;
+      byDay.set(key, (byDay.get(key) || 0) + amt);
+    }
+    const days = byDay.size || 1;
+    const total = Array.from(byDay.values()).reduce((a, b) => a + b, 0);
+    return total / days;
+  }, [expenses]);
 
   // Category totals
   const categories = useMemo(() => {
@@ -76,6 +96,88 @@ export default function Dashboard() {
     totalBudget > 0 ? Math.round((spentTotal / totalBudget) * 100) : 0;
   const todaysUtilizationPct =
     dailyAllowance > 0 ? Math.round((spentToday / dailyAllowance) * 100) : 0;
+
+  // ALERTS: Overspending trend detection (mock heuristic)
+  // If today's spending is > avgDaily by 20% or more, show an alert.
+  // If no history, base against dailyAllowance if provided.
+  const overspendAlert = useMemo(() => {
+    let basis = avgDaily;
+    if (basis === 0 && dailyAllowance > 0) basis = dailyAllowance;
+    if (basis === 0) return null;
+
+    const delta = spentToday - basis;
+    const pct = basis > 0 ? Math.round((delta / basis) * 100) : 0;
+    if (pct >= 20) {
+      return `You’ve spent ${pct}% more than average today.`;
+    }
+    // Also warn if utilization today exceeds 90%
+    if (dailyAllowance > 0 && todaysUtilizationPct >= 90) {
+      return `Heads up: You’ve used ${todaysUtilizationPct}% of today’s allowance.`;
+    }
+    return null;
+  }, [avgDaily, spentToday, dailyAllowance, todaysUtilizationPct]);
+
+  // TIPS: Mock AI-style money-saving tips based on category and patterns
+  const tips = useMemo(() => {
+    const tipsOut = [];
+
+    // Find top 2 categories by spend to tailor suggestions
+    const topCats = [...categories]
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 2)
+      .map((c) => c.label);
+
+    const hasFood = topCats.includes("Food");
+    const hasTransport = topCats.includes("Transport");
+    const hasShopping = topCats.includes("Shopping");
+    const hasEntertainment = topCats.includes("Entertainment");
+
+    // General tip if utilization high
+    if (totalBudget > 0 && totalUtilizationPct > 75) {
+      tipsOut.push(
+        `Your trip spending is at ${totalUtilizationPct}% of budget. Consider a no-spend morning or a low-cost activity to rebalance.`
+      );
+    }
+
+    if (hasFood) {
+      tipsOut.push(
+        "Food tip: Try one sit-down meal per day and choose local markets or take-away for the rest. It can cut daily food costs by 20–30%."
+      );
+    }
+    if (hasTransport) {
+      tipsOut.push(
+        "Transport tip: Look into day passes or multi-ride tickets—often cheaper than single fares if you take 3+ rides."
+      );
+    }
+    if (hasShopping) {
+      tipsOut.push(
+        "Shopping tip: Set a small souvenir cap per day and batch purchases at the end—this curbs impulse buys."
+      );
+    }
+    if (hasEntertainment) {
+      tipsOut.push(
+        "Entertainment tip: Many museums have free hours or discount days. Check schedules to save without missing highlights."
+      );
+    }
+
+    // If today overspending, give a tactical tip
+    if (overspendAlert) {
+      tipsOut.push(
+        "Today-only tip: Swap one paid activity for a scenic walk or free landmark. Small changes help stay on track."
+      );
+    }
+
+    // A default gentle tip if nothing triggered
+    if (tipsOut.length === 0) {
+      tipsOut.push(
+        "General tip: Plan tomorrow’s main meal and book ahead if possible—planning reduces last-minute pricier choices."
+      );
+    }
+
+    // De-duplicate and cap count for brevity
+    const unique = Array.from(new Set(tipsOut));
+    return unique.slice(0, 4);
+  }, [categories, totalBudget, totalUtilizationPct, overspendAlert]);
 
   return (
     <div className="App travel">
@@ -171,6 +273,75 @@ export default function Dashboard() {
               height={280}
               title="Spending by Category"
             />
+          </div>
+
+          {/* Smart Alerts & Tips section */}
+          <div className="card" style={{ marginTop: 16, padding: 16 }}>
+            <div className="card-header" style={{ padding: "0 0 8px 0" }}>
+              <h3 className="card-title" style={{ fontSize: "1.1rem" }}>Smart Alerts & Tips</h3>
+              <p className="card-subtext">Stay on track with spending alerts and tailored suggestions.</p>
+            </div>
+
+            {/* Alert capsule */}
+            <div
+              className="summary-card__capsule"
+              role="status"
+              aria-live="polite"
+              style={{
+                borderColor: overspendAlert ? "var(--pink, #F43F5E)" : "var(--border-dashed, #BDBDBD)",
+                background: overspendAlert ? "rgba(244,63,94,0.06)" : "#fff",
+                marginBottom: 12,
+              }}
+            >
+              <span className="summary-card__label">Alert</span>
+              <span
+                className="summary-card__link"
+                style={{
+                  color: overspendAlert ? "var(--accent-red, #D32F2F)" : "var(--text-muted, #6B6B6B)",
+                  fontWeight: overspendAlert ? 800 : 600,
+                }}
+              >
+                {overspendAlert ? overspendAlert : "No alerts. You’re on track today."}
+              </span>
+              <span className="summary-card__value summary-card__value--placeholder">–</span>
+            </div>
+
+            {/* Tips list */}
+            <ul
+              aria-label="Money-saving tips"
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "grid",
+                gap: 8,
+              }}
+            >
+              {tips.map((t, idx) => (
+                <li
+                  key={`tip_${idx}`}
+                  className="summary-card"
+                  style={{
+                    padding: "10px 12px",
+                    minHeight: "auto",
+                    display: "grid",
+                    gridTemplateColumns: "auto 1fr",
+                    alignItems: "start",
+                    gap: 10,
+                  }}
+                >
+                  <span aria-hidden="true" style={{ fontSize: 16 }}>💡</span>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: "var(--text-strong, #0B0B0B)" }}>
+                      {t}
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--text-muted, #6B6B6B)" }}>
+                      Tip generated based on recent spend patterns.
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="actions" style={{ marginTop: 18 }}>
