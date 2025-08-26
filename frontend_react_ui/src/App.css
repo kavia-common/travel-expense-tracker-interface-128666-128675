@@ -43,7 +43,7 @@
 }
 
 html, body, #root, .App {
-  height: 100%;
+  min-height: 100%;
   /* Subtle global ambient background with noise for depth */
   background:
     var(--bg-grad-1),
@@ -80,10 +80,12 @@ html::before, body::before, .App::before {
 .hero {
   position: relative;
   padding: 36px 0 56px; /* extra bottom to create soft overlap with card */
+  /* Make the background image more prominent and ensure it covers the entire hero area */
   background:
-    /* soft fog to blend hero with page background */
-    radial-gradient(100% 60% at 50% 0%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.9) 70%, #ffffff 100%),
-    url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=2069&auto=format&fit=crop') center/cover no-repeat;
+    /* lighter fog to allow the image to be bolder while keeping text readable */
+    radial-gradient(100% 60% at 50% 0%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.75) 70%, #ffffff 95%),
+    url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=2069&auto=format&fit=crop') center center / cover no-repeat;
+  background-attachment: fixed; /* create immersive feel and ensure coverage on large screens */
   border-bottom: 1px solid var(--gray-100);
 }
 .hero .container {
@@ -98,14 +100,14 @@ html::before, body::before, .App::before {
   position: absolute;
   inset: 0;
   background:
-    /* primary accent bloom */
-    radial-gradient(60% 60% at 30% 10%, rgba(255,214,0,0.10) 0%, rgba(255,255,255,0) 60%),
+    /* primary accent bloom (slightly stronger to aid readability) */
+    radial-gradient(60% 60% at 30% 10%, rgba(255,214,0,0.12) 0%, rgba(255,255,255,0) 60%),
     /* secondary accent bloom */
-    radial-gradient(50% 60% at 80% 0%, rgba(59,130,246,0.10) 0%, rgba(255,255,255,0) 60%),
-    /* ambient vignette to focus content */
-    radial-gradient(120% 80% at 50% -20%, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.00) 60%);
+    radial-gradient(50% 60% at 80% 0%, rgba(59,130,246,0.12) 0%, rgba(255,255,255,0) 60%),
+    /* ambient vignette to focus content (a bit stronger near top) */
+    radial-gradient(120% 80% at 50% -20%, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.00) 60%);
   pointer-events: none;
-  backdrop-filter: blur(1px);
+  backdrop-filter: blur(0.5px);
 }
 
 .hero-content {
