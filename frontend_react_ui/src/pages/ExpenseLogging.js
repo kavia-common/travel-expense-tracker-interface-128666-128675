@@ -16,7 +16,7 @@ import { useExpenses } from "../context/ExpensesContext";
  * On submit, it saves into the global expenses context to update the dashboard instantly.
  */
 export default function ExpenseLogging() {
-  const { addExpense } = useExpenses();
+  const { addExpense, deleteExpense, expenses } = useExpenses();
 
   // Form state
   const [amount, setAmount] = useState("");
@@ -345,6 +345,69 @@ export default function ExpenseLogging() {
             <a className="btn-secondary" href="/dashboard" title="Go to Dashboard">
               Go to Dashboard →
             </a>
+          </div>
+
+          {/* Current Expenses List */}
+          <div className="card" style={{ marginTop: 16, padding: 16 }}>
+            <div className="card-header" style={{ padding: "0 0 8px 0" }}>
+              <h3 className="card-title" style={{ fontSize: "1.1rem" }}>Current Expenses</h3>
+              <p className="card-subtext">Manage your logged expenses. Deleting an item updates the dashboard instantly.</p>
+            </div>
+
+            {expenses.length === 0 ? (
+              <p className="hint" style={{ margin: 0 }}>No expenses yet. Add your first expense above.</p>
+            ) : (
+              <ul
+                style={{
+                  listStyle: "none",
+                  margin: 0,
+                  padding: 0,
+                  display: "grid",
+                  gap: 8,
+                }}
+                aria-label="Logged expenses"
+              >
+                {expenses.map((e) => (
+                  <li
+                    key={e.id}
+                    className="summary-card"
+                    style={{
+                      padding: "10px 12px",
+                      minHeight: "auto",
+                      display: "grid",
+                      gridTemplateColumns: "1fr auto",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                    role="group"
+                    aria-label={`${e.category} ${formatCurrency(e.amount)} on ${e.date}${e.notes ? `, ${e.notes}` : ""}`}
+                  >
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13 }}>
+                        {e.category} • <span style={{ color: "var(--accent-blue, #1E88E5)" }}>{formatCurrency(e.amount)}</span>
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--text-muted, #6B6B6B)" }}>
+                        {e.date} {e.notes ? `• ${e.notes}` : ""}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => deleteExpense(e.id)}
+                      className="btn-secondary"
+                      aria-label={`Delete expense ${formatCurrency(e.amount)} in ${e.category} on ${e.date}`}
+                      title="Delete"
+                      style={{
+                        padding: "8px 12px",
+                        borderRadius: 12,
+                        fontWeight: 800,
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </form>
       </div>

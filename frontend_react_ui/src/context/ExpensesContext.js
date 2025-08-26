@@ -42,16 +42,23 @@ export function ExpensesProvider({ children }) {
     // If there is a backend later: perform POST request here and handle errors (rollback if needed).
   }, []);
 
+  // PUBLIC_INTERFACE
+  const deleteExpense = React.useCallback((id) => {
+    // Remove an expense by its id
+    setExpenses((prev) => prev.filter((e) => e.id !== id));
+  }, []);
+
   const value = React.useMemo(
     () => ({
       expenses,
       addExpense,
+      deleteExpense,
       totalBudget,
       setTotalBudget,
       dailyAllowance,
       setDailyAllowance,
     }),
-    [expenses, addExpense, totalBudget, dailyAllowance]
+    [expenses, addExpense, deleteExpense, totalBudget, dailyAllowance]
   );
 
   return <ExpensesContext.Provider value={value}>{children}</ExpensesContext.Provider>;
