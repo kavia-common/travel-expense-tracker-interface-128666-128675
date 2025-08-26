@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import "../App.css";
 import CategoryBreakdownPieChart from "../components/CategoryBreakdownPieChart";
+import { useExpenses } from "../context/ExpensesContext";
 
 /**
  * Dashboard page shows overview of budget vs. spending with minimal card UI.
@@ -8,26 +9,53 @@ import CategoryBreakdownPieChart from "../components/CategoryBreakdownPieChart";
  * - Remaining funds
  * - Daily allowance vs. spent
  * - Category breakdown with a pie chart (Recharts)
+ *
+ * Now connected to the global Expenses store for live updates.
  */
 
 // PUBLIC_INTERFACE
 export default function Dashboard() {
-  // Demo data; in future connect to real store/backend
-  const totalBudget = 1500;
-  const spentTotal = 620;
-  const dailyAllowance = 120;
-  const spentToday = 85;
+  const { expenses, totalBudget, dailyAllowance } = useExpenses();
 
-  const categories = useMemo(
-    () => [
-      { label: "Food", value: 240 },
-      { label: "Transport", value: 120 },
-      { label: "Shopping", value: 140 },
-      { label: "Entertainment", value: 90 },
-      { label: "Misc", value: 30 },
-    ],
-    []
+  // Compute totals from expenses
+  const spentTotal = useMemo(
+    () => expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
+    [expenses]
   );
+
+  // Today’s spending (based on local date string yyyy-mm-dd)
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }, []);
+  const spentToday = useMemo(
+    () => expenses.filter((e) => e.date === todayStr).reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
+    [expenses, todayStr]
+  );
+
+  // Category totals
+  const categories = useMemo(() => {
+    if (!expenses.length) {
+      // Keep a friendly initial sample when empty
+      return [
+        { label: "Food", value: 240 },
+        { label: "Transport", value: 120 },
+        { label: "Shopping", value: 140 },
+        { label: "Entertainment", value: 90 },
+        { label: "Misc", value: 30 },
+      ];
+    }
+    const map = new Map();
+    for (const e of expenses) {
+      const key = e.category || "Misc";
+      const v = Number(e.amount) || 0;
+      map.set(key, (map.get(key) || 0) + v);
+    }
+    return Array.from(map.entries()).map(([label, value]) => ({ label, value }));
+  }, [expenses]);
 
   const remaining = Math.max(0, totalBudget - spentTotal);
   const colors = ["#ffd600", "#22c55e", "#f43f5e", "#3b82f6", "#6b7280"];
@@ -43,9 +71,11 @@ export default function Dashboard() {
       maximumFractionDigits: 0,
     }).format(n || 0);
 
-  // Derived percentages
-  const totalUtilizationPct = Math.round((spentTotal / totalBudget) * 100);
-  const todaysUtilizationPct = Math.round((spentToday / dailyAllowance) * 100);
+  // Derived percentages (guard divide-by-zero)
+  const totalUtilizationPct =
+    totalBudget > 0 ? Math.round((spentTotal / totalBudget) * 100) : 0;
+  const todaysUtilizationPct =
+    dailyAllowance > 0 ? Math.round((spentToday / dailyAllowance) * 100) : 0;
 
   return (
     <div className="App travel">

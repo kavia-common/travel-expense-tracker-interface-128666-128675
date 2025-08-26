@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "../App.css";
+import { useExpenses } from "../context/ExpensesContext";
 
 /**
  * PUBLIC_INTERFACE
@@ -12,8 +13,11 @@ import "../App.css";
  * - Group Mode (assign expense to one/more persons)
  *
  * This page mirrors the visual style used elsewhere (hero + floating card).
+ * On submit, it saves into the global expenses context to update the dashboard instantly.
  */
 export default function ExpenseLogging() {
+  const { addExpense } = useExpenses();
+
   // Form state
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("Food");
@@ -30,6 +34,7 @@ export default function ExpenseLogging() {
   const [groupMode, setGroupMode] = useState("all"); // all | specific
   const [people] = useState(["You", "Alex", "Sam", "Jamie"]);
   const [selectedPeople, setSelectedPeople] = useState(["You"]);
+  const [justSaved, setJustSaved] = useState(false);
 
   useEffect(() => {
     document.title = "Expense Logging";
@@ -56,11 +61,23 @@ export default function ExpenseLogging() {
       alert("Please enter a valid amount greater than 0.");
       return;
     }
-    const assignment =
-      groupMode === "all" ? "All travelers" : selectedPeople.join(", ") || "(none)";
-    alert(
-      `Expense added:\n- Amount: ${formatCurrency(amt)}\n- Category: ${category}\n- Date: ${date}\n- Notes: ${notes || "(none)"}\n- Assigned to: ${assignment}`
-    );
+
+    // Prepare payload for store (extensible for backend)
+    const payload = {
+      amount: amt,
+      category,
+      date,
+      notes: notes.trim(),
+      assignedTo: groupMode === "all" ? "ALL" : [...selectedPeople],
+    };
+
+    // Optimistic: immediately add to global state so dashboard updates without reload
+    addExpense(payload);
+
+    // Soft confirmation toast-ish feedback
+    setJustSaved(true);
+    setTimeout(() => setJustSaved(false), 2000);
+
     // Reset minimal fields for quick add
     setAmount("");
     setNotes("");
@@ -104,6 +121,25 @@ export default function ExpenseLogging() {
           <div className="card-header">
             <h2 className="card-title">Add an Expense</h2>
             <p className="card-subtext">Fill in the details and save it to your trip.</p>
+            {justSaved && (
+              <div
+                role="status"
+                aria-live="polite"
+                style={{
+                  marginTop: 8,
+                  padding: "8px 10px",
+                  borderRadius: 10,
+                  background: "rgba(34,197,94,0.10)",
+                  border: "1px solid rgba(34,197,94,0.45)",
+                  color: "var(--text-strong, #0B0B0B)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  display: "inline-block",
+                }}
+              >
+                Expense saved. Dashboard updated.
+              </div>
+            )}
           </div>
 
           <div className="inputs-grid">

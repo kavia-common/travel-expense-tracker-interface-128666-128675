@@ -4,10 +4,14 @@ import TripSetup from "./TripSetup";
 import Dashboard from "./pages/Dashboard";
 import ExpenseLogging from "./pages/ExpenseLogging";
 import NavBar from "./components/NavBar";
+import { ExpensesProvider } from "./context/ExpensesContext";
 
 /**
  * Root with minimal client-side routing by path prefix.
  * Avoids external dependencies while enabling navigation between pages.
+ *
+ * Provides a global ExpensesProvider so the Expense Logging page can add a new
+ * expense and the Dashboard reflects the change instantly (optimistic UI).
  */
 
 // PUBLIC_INTERFACE
@@ -44,9 +48,11 @@ export default function App() {
   else if (path.startsWith("/dashboard")) Page = Dashboard;
 
   return (
-    <div className="App travel">
-      <NavBar />
-      <Page />
-    </div>
+    <ExpensesProvider>
+      <div className="App travel">
+        <NavBar />
+        <Page />
+      </div>
+    </ExpensesProvider>
   );
 }
