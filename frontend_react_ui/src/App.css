@@ -1,6 +1,8 @@
 /* Theme variables and palette */
 :root {
   --white: #ffffff;
+  /* Public root for assets served by CRA (ensures CSS doesn't attempt module resolution) */
+  --public-url: /;
   --black: #0a0a0a;
   --gray-900: #1a1a1a;
   --gray-700: #3d3d3d;
@@ -44,8 +46,11 @@
 
 html, body, #root, .App {
   min-height: 100%;
-  /* Subtle global ambient background with noise for depth */
+  /* Layer the custom SVG background with our soft ambient gradients and base color */
   background:
+    /* SVG travel backdrop */
+    url(var(--public-url)background.svg) center top / cover no-repeat fixed,
+    /* Ambient soft blooms for extra depth that also help tiling on ultra-wide screens */
     var(--bg-grad-1),
     var(--bg-grad-2),
     var(--bg-grad-3),
@@ -80,12 +85,9 @@ html::before, body::before, .App::before {
 .hero {
   position: relative;
   padding: 36px 0 56px; /* extra bottom to create soft overlap with card */
-  /* Make the background image more prominent and ensure it covers the entire hero area */
+  /* Keep hero minimal; rely on global background, with a soft mist to ensure readability */
   background:
-    /* lighter fog to allow the image to be bolder while keeping text readable */
-    radial-gradient(100% 60% at 50% 0%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.75) 70%, #ffffff 95%),
-    url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=2069&auto=format&fit=crop') center center / cover no-repeat;
-  background-attachment: fixed; /* create immersive feel and ensure coverage on large screens */
+    radial-gradient(100% 60% at 50% 0%, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.85) 70%, #ffffff 96%);
   border-bottom: 1px solid var(--gray-100);
 }
 .hero .container {
