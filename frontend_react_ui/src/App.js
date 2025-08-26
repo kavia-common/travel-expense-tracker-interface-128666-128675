@@ -29,9 +29,6 @@ export default function App() {
   const [dailyBudget, setDailyBudget] = useState(120);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  // Friends UI state
-  const [friendInput, setFriendInput] = useState('');
-  const [friends, setFriends] = useState([]);
 
   // Accessibility: announce changes (simple demo via title)
   useEffect(() => {
@@ -63,38 +60,6 @@ export default function App() {
       maximumFractionDigits: 0,
     }).format(n || 0);
 
-  // Helpers for friends input
-  const normalized = (s) => s.trim().replace(/\s+/g, ' ');
-  const isValidFriend = (s) => normalized(s).length > 0;
-
-  // PUBLIC_INTERFACE
-  const addFriend = () => {
-    const value = normalized(friendInput);
-    if (!isValidFriend(value)) return;
-    if (friends.includes(value)) {
-      setFriendInput('');
-      return;
-    }
-    setFriends((prev) => [...prev, value]);
-    setFriendInput('');
-  };
-
-  // PUBLIC_INTERFACE
-  const removeFriend = (name) => {
-    setFriends((prev) => prev.filter((f) => f !== name));
-  };
-
-  // PUBLIC_INTERFACE
-  const handleFriendKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      addFriend();
-    } else if (e.key === 'Backspace' && friendInput === '' && friends.length) {
-      // quick remove last chip when input is empty
-      removeFriend(friends[friends.length - 1]);
-    }
-  };
-
   // PUBLIC_INTERFACE
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -104,8 +69,7 @@ export default function App() {
 - Dates: ${startDate || 'N/A'} to ${endDate || 'N/A'} (${tripSummary.days} days)
 - Daily Budget: ${formatCurrency(dailyBudget)}
 - Total Budget: ${formatCurrency(totalBudget)}
-- Est. Total: ${formatCurrency(tripSummary.estTotal)}
-- Friends: ${friends.length ? friends.join(', ') : 'None'}`
+- Est. Total: ${formatCurrency(tripSummary.estTotal)}`
     );
   };
 
@@ -239,59 +203,6 @@ export default function App() {
               />
               <small className="hint">When your trip finishes.</small>
             </div>
-
-            {/* Add Friends */}
-            <div className="field friends-field">
-              <label className="label">
-                Add friends
-                <span className="dot dot-green" />
-              </label>
-              <div className="friends-input-wrap">
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Type a name or email, then press Enter"
-                  value={friendInput}
-                  onChange={(e) => setFriendInput(e.target.value)}
-                  onKeyDown={handleFriendKeyDown}
-                  aria-label="Add friend by name or email"
-                />
-                <button
-                  type="button"
-                  className="btn-ghost friends-add-btn"
-                  onClick={addFriend}
-                  aria-label="Add friend"
-                  title="Add friend"
-                >
-                  +
-                </button>
-              </div>
-
-              {friends.length > 0 && (
-                <div className="friends-chips" aria-live="polite">
-                  {friends.map((f) => (
-                    <span key={f} className="chip chip-friend" role="listitem">
-                      <span className="chip-avatar" aria-hidden="true">
-                        👥
-                      </span>
-                      <span className="chip-text">{f}</span>
-                      <button
-                        type="button"
-                        className="chip-remove"
-                        aria-label={`Remove ${f}`}
-                        onClick={() => removeFriend(f)}
-                        title="Remove"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-              <small className="hint">
-                Invite friends to split costs. We’ll show per-person shares later.
-              </small>
-            </div>
           </div>
 
           <div className="summary card">
@@ -309,12 +220,6 @@ export default function App() {
               <span className="summary-label">Planned total</span>
               <span className="summary-value accent">{formatCurrency(tripSummary.estTotal)}</span>
             </div>
-            {friends.length > 0 && (
-              <div className="summary-row">
-                <span className="summary-label">Group size</span>
-                <span className="summary-value">{friends.length + 1} travelers</span>
-              </div>
-            )}
           </div>
 
           <div className="actions">
@@ -330,8 +235,6 @@ export default function App() {
                 setDailyBudget(120);
                 setStartDate('');
                 setEndDate('');
-                setFriends([]);
-                setFriendInput('');
               }}
             >
               Reset

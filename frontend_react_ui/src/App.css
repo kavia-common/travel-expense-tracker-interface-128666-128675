@@ -238,9 +238,7 @@ html::before, body::before, .App::before {
   .field:nth-child(2) { grid-column: span 3; }
   .field:nth-child(3) { grid-column: span 3; }
   .field:nth-child(4) { grid-column: span 3; }
-  /* End Date (5th) and Friends (6th) share the row on larger screens */
   .field:nth-child(5) { grid-column: span 3; }
-  .field.friends-field { grid-column: span 6; }
 }
 
 .label {
@@ -393,66 +391,6 @@ html::before, body::before, .App::before {
 }
 .summary-value.accent {
   color: var(--blue);
-}
-
-/* Friends input/chips */
-.friends-input-wrap {
-  display: grid;
-  grid-template-columns: 1fr 48px;
-  gap: 8px;
-  align-items: center;
-}
-
-.friends-add-btn {
-  height: 48px;
-  width: 48px;
-  font-size: 20px;
-}
-
-.friends-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.chip-friend {
-  background: linear-gradient(180deg, #ffffff, #f9fafb);
-  border: 1px solid var(--gray-200);
-  color: var(--gray-700);
-  padding-right: 4px;
-}
-
-.chip-avatar {
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 6px;
-}
-
-.chip-text {
-  margin-right: 6px;
-}
-
-.chip-remove {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: var(--gray-500);
-  border-radius: 8px;
-  cursor: pointer;
-  padding: 2px 6px;
-  font-weight: 800;
-  transition: background var(--elevate), color var(--elevate), transform var(--press);
-}
-.chip-remove:hover {
-  background: var(--gray-100);
-  color: var(--black);
-}
-.chip-remove:active {
-  transform: scale(0.96);
 }
 
 /* Actions */
