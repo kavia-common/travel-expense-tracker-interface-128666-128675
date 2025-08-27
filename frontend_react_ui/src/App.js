@@ -4,6 +4,7 @@ import TripSetup from "./TripSetup";
 import Dashboard from "./pages/Dashboard";
 import NavBar from "./components/NavBar";
 import ExpenseLogging from "./pages/ExpenseLogging";
+import SmartAlertsTips from "./pages/SmartAlertsTips";
 
 /**
  * Root with minimal client-side routing by path prefix.
@@ -42,6 +43,7 @@ export default function App() {
   let Page = TripSetup;
   if (path.startsWith("/dashboard")) Page = Dashboard;
   if (path.startsWith("/expenses")) Page = ExpenseLogging;
+  if (path.startsWith("/smart")) Page = SmartAlertsTips;
 
   return (
     <div className="App travel">
