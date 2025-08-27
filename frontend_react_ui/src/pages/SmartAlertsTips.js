@@ -6,7 +6,7 @@ import { ExpensesContext, DEFAULT_CATEGORIES } from "../context/ExpensesContext"
  * SmartAlertsTips page
  * - Live Overspending Alerts derived from ExpensesContext (spentToday vs average daily spend and dailyAllowance, totalBudget, category spikes)
  * - AI-powered Tips (rule-based local heuristics)
- * - "Plan My Day" budget entry UI: user enters budget; we propose a simple day plan across categories
+ * - "Plan My Day" budget entry UI: user enters budget; we propose a day plan across categories using local logic and savings heuristics
  */
 
 // Local helpers
@@ -265,45 +265,126 @@ export default function SmartAlertsTips() {
   // Plan My Day
   const [dayBudget, setDayBudget] = React.useState(80);
   const [plan, setPlan] = React.useState(null);
+  const [savingsNotes, setSavingsNotes] = React.useState([]);
+
+  // Internal helper: generate savings heuristics based on budget level and allocations
+  function computeSavings(items, budget) {
+    const notes = [];
+    const byLabel = Object.fromEntries(items.map(i => [i.label, i.amount || 0]));
+
+    // General tiered guidance based on budget size
+    if (budget < 40) {
+      notes.push("Leverage free attractions and walk between sights to save on transport.");
+    } else if (budget < 80) {
+      notes.push("Target a fixed-price lunch and 1–2 short transit rides; pick one low-cost highlight.");
+    } else {
+      notes.push("Bundle paid activities with one free experience to keep value high under budget.");
+    }
+
+    // Category-specific nudges
+    if ((byLabel.Food || 0) >= budget * 0.35) {
+      notes.push("Swap one restaurant meal for grab-and-go or grocery breakfast to trim food costs.");
+    }
+    if ((byLabel.Transport || 0) >= 12) {
+      notes.push("Consider a transit day pass if you expect 3+ rides, or plan a walking loop.");
+    }
+    if ((byLabel.Entertainment || 0) > 0 && (byLabel.Entertainment || 0) >= (byLabel.Food || 0)) {
+      notes.push("Look for free museum hours/parks to balance paid entertainment.");
+    }
+    if ((byLabel.Shopping || 0) > 0) {
+      notes.push("Set a souvenir cap and batch shopping into one window to avoid multiple small splurges.");
+    }
+    return notes.slice(0, 4);
+  }
 
   // PUBLIC_INTERFACE
   const generatePlan = React.useCallback(() => {
-    // Simple proportional allocator across categories with sensible minimums
+    // Baseline categories with minimums and weights
     const baseline = [
-      { label: "Food", min: 20, weight: 3 },
-      { label: "Transport", min: 8, weight: 1.5 },
-      { label: "Entertainment", min: 0, weight: 1.3 },
-      { label: "Shopping", min: 0, weight: 0.8 },
-      { label: "Misc", min: 0, weight: 0.6 },
+      { label: "Food", min: 18, weight: 3.0 },
+      { label: "Transport", min: 6, weight: 1.4 },
+      { label: "Entertainment", min: 0, weight: 1.2 },
+      { label: "Shopping", min: 0, weight: 0.7 },
+      { label: "Misc", min: 0, weight: 0.5 },
     ];
 
-    // Adjust weights inversely to recent share to encourage rebalancing
+    // Adjust weights inversely to recent share to encourage rebalancing (value maximization)
     const mapShare = new Map(categoriesTotals.map(c => [c.label, c.value]));
     const totalSpent = categoriesTotals.reduce((a, b) => a + b.value, 0) || 1;
 
     const adjusted = baseline.map(b => {
       const spent = mapShare.get(b.label) || 0;
       const share = spent / totalSpent;
-      // If share is high, reduce weight slightly; if low, increase slightly
-      const factor = 1 + (0.2 - Math.min(0.2, share)); // 0.8..1.2 approx
-      return { ...b, weight: Math.max(0.4, b.weight * factor) };
+      // If share is high, reduce current day's weight; if low, increase to diversify experiences
+      const factor = 1 + (0.25 - Math.min(0.25, share)); // gently 0.75..1.25 scaling
+      return { ...b, weight: Math.max(0.35, b.weight * factor) };
     });
 
-    const totalWeight = adjusted.reduce((a, b) => a + b.weight, 0) || 1;
-    const afterMins = Math.max(0, dayBudget - adjusted.reduce((a, b) => a + b.min, 0));
+    // Ensure feasibility under very low budgets: cap mins to fit
+    const sumMins = adjusted.reduce((a, b) => a + b.min, 0);
+    let effectiveBudget = Math.max(0, dayBudget || 0);
 
-    const allocations = adjusted.map(b => {
+    let minsScaled = adjusted.map(b => ({ ...b }));
+    if (sumMins > effectiveBudget) {
+      // Scale down minimums proportionally so they fit under budget
+      const scale = effectiveBudget / sumMins;
+      minsScaled = adjusted.map(b => ({ ...b, min: Math.floor(b.min * scale) }));
+    }
+
+    const totalWeight = minsScaled.reduce((a, b) => a + b.weight, 0) || 1;
+    const afterMins = Math.max(0, effectiveBudget - minsScaled.reduce((a, b) => a + b.min, 0));
+
+    // Initial allocations
+    let allocations = minsScaled.map(b => {
       const extra = (b.weight / totalWeight) * afterMins;
-      return { label: b.label, amount: Math.max(0, Math.round((b.min + extra) * 1) ) };
+      return { label: b.label, amount: Math.max(0, Math.round(b.min + extra)) };
     });
 
-    // Create a very simple "itinerary" wording
+    // Savings heuristics to keep under budget and maximize perceived value:
+    // - Guarantee at least a minimal entertainment offering if possible by borrowing from Shopping/Misc.
+    const totalAlloc = allocations.reduce((a, b) => a + b.amount, 0);
+    if (effectiveBudget > 0 && totalAlloc <= effectiveBudget) {
+      const ent = allocations.find(a => a.label === "Entertainment");
+      if (ent && ent.amount < Math.min(12, Math.floor(effectiveBudget * 0.2))) {
+        const needed = Math.min(
+          Math.min(12, Math.floor(effectiveBudget * 0.2)) - ent.amount,
+          effectiveBudget - totalAlloc
+        );
+        if (needed > 0) {
+          // Pull from Shopping then Misc
+          for (const donorLabel of ["Shopping", "Misc"]) {
+            const donor = allocations.find(a => a.label === donorLabel);
+            if (!donor || needed <= 0) continue;
+            const give = Math.min(donor.amount, needed);
+            donor.amount -= give;
+            ent.amount += give;
+          }
+        }
+      }
+    }
+
+    // If we somehow exceeded budget due to rounding, trim lowest-value buckets first (Misc, Shopping)
+    let currentTotal = allocations.reduce((a, b) => a + b.amount, 0);
+    if (currentTotal > effectiveBudget) {
+      const order = ["Misc", "Shopping", "Transport", "Food", "Entertainment"];
+      let over = currentTotal - effectiveBudget;
+      for (const label of order) {
+        const a = allocations.find(x => x.label === label);
+        if (!a) continue;
+        const cut = Math.min(a.amount, over);
+        a.amount -= cut;
+        over -= cut;
+        if (over <= 0) break;
+      }
+    }
+
+    // Build activity ideas and savings notes
     const activities = [
-      { label: "Food", text: "Breakfast + casual lunch" },
-      { label: "Transport", text: "Transit day pass or 2–3 rides" },
-      { label: "Entertainment", text: "Low-cost attraction or free museum hour" },
-      { label: "Shopping", text: "Souvenirs window-shop or small gift" },
-      { label: "Misc", text: "Contingency for small surprises" },
+      { label: "Food", text: "Breakfast + simple lunch (consider fixed-price menu)" },
+      { label: "Transport", text: "Transit day pass or 2–3 rides; walk short legs" },
+      { label: "Entertainment", text: "One value highlight + free museum hour/park" },
+      { label: "Shopping", text: "Souvenir window-shop with a small cap" },
+      { label: "Misc", text: "Buffer for coffee/water or surprises" },
     ];
 
     const items = allocations
@@ -313,11 +394,15 @@ export default function SmartAlertsTips() {
         idea: (activities.find(x => x.label === a.label) || {}).text || "Flexible activity",
       }));
 
+    // Compute savings guidance
+    const notes = computeSavings(items, effectiveBudget);
+
     setPlan({
-      budget: dayBudget,
+      budget: effectiveBudget,
       items,
       total: items.reduce((a, b) => a + b.amount, 0),
     });
+    setSavingsNotes(notes);
   }, [dayBudget, categoriesTotals]);
 
   const colors = React.useMemo(() => Object.fromEntries(DEFAULT_CATEGORIES.map(c => [c.label, c.color])), []);
@@ -459,9 +544,9 @@ export default function SmartAlertsTips() {
 
           <div className="card-header" style={{ paddingBottom: 2 }}>
             <h2 className="card-title">Plan My Day</h2>
-            <p className="card-subtext">Enter a day budget and get a simple, balanced plan.</p>
+            <p className="card-subtext">Enter a day budget and get a budget-optimized plan with savings tips.</p>
             <small className="hint">
-              Placeholder: enter a value and click Generate Plan to view a suggested allocation.
+              No external data required. We use local heuristics to balance categories and keep under budget.
             </small>
           </div>
 
@@ -469,7 +554,16 @@ export default function SmartAlertsTips() {
             <h3 id="pmd-h" className="sr-only" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clipPath: "inset(50%)" }}>
               Plan My Day
             </h3>
-            <div className="inputs-grid" style={{ marginTop: 6 }}>
+
+            {/* Budget input form */}
+            <form
+              className="inputs-grid"
+              style={{ marginTop: 6 }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                generatePlan();
+              }}
+            >
               <div className="field">
                 <label className="label">
                   Day budget
@@ -485,16 +579,17 @@ export default function SmartAlertsTips() {
                     value={dayBudget}
                     onChange={(e) => setDayBudget(Number(e.target.value))}
                     aria-label="Day budget"
+                    required
                   />
                 </div>
-                <small className="hint">We’ll propose a simple allocation across categories.</small>
+                <small className="hint">We’ll propose an allocation across food, transport, entertainment, shopping, and misc.</small>
               </div>
-            </div>
 
-            <div className="actions">
-              <button type="button" className="btn-primary" onClick={generatePlan}>Generate Plan</button>
-              <a className="btn-secondary" href="/expenses" title="Log an expense">Log Expense →</a>
-            </div>
+              <div className="actions" style={{ gridColumn: "1 / -1" }}>
+                <button type="submit" className="btn-primary">Generate Plan</button>
+                <a className="btn-secondary" href="/expenses" title="Log an expense">Log Expense →</a>
+              </div>
+            </form>
 
             {!plan && (
               <div className="summary card" aria-live="polite" style={{ marginTop: 14 }}>
@@ -503,7 +598,7 @@ export default function SmartAlertsTips() {
                   <span className="summary-value">No plan generated yet</span>
                 </div>
                 <p className="info-text" style={{ marginTop: 6 }}>
-                  Enter a budget above and click “Generate Plan” to see a suggested split for the day.
+                  Enter a budget above and click “Generate Plan” to see a suggested split and savings tips.
                 </p>
               </div>
             )}
@@ -528,7 +623,7 @@ export default function SmartAlertsTips() {
                         <span
                           aria-hidden="true"
                           className="category-dot"
-                          style={{ background: colors[it.label] || "#6b7280" }}
+                          style={{ background: (Object.fromEntries(DEFAULT_CATEGORIES.map(c => [c.label, c.color]))[it.label]) || "#6b7280" }}
                         />
                         <span className="category-name">{it.label}</span>
                       </div>
@@ -536,6 +631,27 @@ export default function SmartAlertsTips() {
                     </div>
                   ))}
                 </div>
+
+                {/* Savings tips under the plan */}
+                {savingsNotes.length > 0 && (
+                  <>
+                    <div className="rule" />
+                    <div className="category-list" style={{ marginTop: 6 }}>
+                      {savingsNotes.map((note, idx) => (
+                        <div key={idx} className="category-list-row">
+                          <div className="category-list-left">
+                            <span aria-hidden="true" className="category-dot" style={{ background: "var(--green)" }} />
+                            <span className="category-name">Savings Tip</span>
+                          </div>
+                          <div className="category-amount" style={{ fontWeight: 600, color: "var(--gray-700)" }}>
+                            {note}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
                 <div className="footer-row" style={{ marginTop: 10 }}>
                   <span className="pill">Idea</span>
                   <span className="summary-value" style={{ fontWeight: 600 }}>
