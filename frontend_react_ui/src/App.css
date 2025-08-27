@@ -600,54 +600,102 @@ html::before, body::before, .App::before {
 .overview {
   background: var(--gray-100);
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 18px; /* slightly reduced to feel lighter */
 }
 .overview .header {
-  margin-bottom: 12px;
+  margin-bottom: 8px; /* tighter header spacing */
 }
 .overview .header h2 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.18rem;
   font-weight: 800;
   letter-spacing: -0.01em;
 }
 .overview .header p {
-  margin: 4px 0 0 0;
+  margin: 2px 0 0 0; /* reduced meta spacing */
   color: var(--gray-500);
-  font-size: 0.95rem;
+  font-size: 0.93rem;
 }
 .overview .cards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 22px; /* increase inter-card white space */
 }
 @media (max-width: 767px) {
   .overview .cards { grid-template-columns: 1fr; }
 }
 
+/* Compact card variants for summary boxes */
+.card--compact {
+  padding: 12px 14px; /* shorter interior padding */
+}
+.card--compact .info-title {
+  margin: 0 0 6px 0;
+  font-size: 1rem; /* a notch smaller */
+}
+.card--compact .info-text {
+  margin: 0 0 8px 0;
+  font-size: 0.92rem;
+  color: var(--gray-500);
+}
+
 /* Dotted containers and progress primitives */
 .dotted-box {
   border: 2px dotted rgba(28,28,28,0.6);
-  border-radius: 14px;
-  padding: 10px 12px;
+  border-radius: 12px; /* slightly tighter radius for compact feel */
+  padding: 8px 10px;   /* reduced internal padding */
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;           /* smaller internal gap */
   background: linear-gradient(180deg, #fafafa, #fff);
+  min-height: 34px;   /* ensure compact but not cramped */
+}
+.dotted-box--row {
+  justify-content: space-between;
 }
 .progress-bg {
   background: var(--gray-100);
-  height: 8px;
-  border-radius: 8px;
+  height: 6px;        /* slimmer progress height */
+  border-radius: 6px;
   width: 100%;
   overflow: hidden;
 }
 .progress-fill {
   background: var(--black);
   height: 100%;
-  border-radius: 8px;
+  border-radius: 6px;
   width: var(--progress, 0%);
   transition: width var(--elevate);
+}
+
+/* Make footer row compact */
+.footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px; /* add a touch of breathing room */
+}
+.pill {
+  background: var(--gray-100);
+  padding: 3px 10px; /* slightly slimmer */
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--black);
+}
+
+/* Increase breathing room around the overall info areas */
+.section {
+  margin-top: 22px; /* slightly more than before to open up vertical rhythm */
+}
+
+/* Info cards section spacing adjustments to feel more open */
+.info-cards {
+  margin-top: 56px; /* more space before lower info section */
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px; /* more generous gaps */
 }
 
 /* Footer rows and pills */

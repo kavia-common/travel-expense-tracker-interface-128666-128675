@@ -179,8 +179,8 @@ export default function Dashboard() {
 
       {/* Floating metrics card */}
       <div className="floating-card-wrapper">
-        <div className="card floating-card card--loose">
-          <div className="card-header" style={{ paddingBottom: 6 }}>
+        <div className="card floating-card card--loose" style={{ paddingTop: 18, paddingBottom: 18 }}>
+          <div className="card-header" style={{ paddingBottom: 2 }}>
             <h2 className="card-title">Overview</h2>
             <p className="card-subtext">Quick snapshot of your trip finances.</p>
           </div>
@@ -195,7 +195,7 @@ export default function Dashboard() {
 
             <div className="cards">
               {/* Total Budget vs Spent (left of row 1) */}
-              <article className="card card--tight" aria-live="polite">
+              <article className="card card--compact" aria-live="polite">
                 <h3 className="info-title">Total Budget vs. Spent</h3>
                 <p className="info-text">
                   Budget: <strong>{formatCurrency(totalBudget)}</strong> — Spent:{" "}
@@ -203,7 +203,7 @@ export default function Dashboard() {
                 </p>
 
                 {/* Dotted progress box */}
-                <div className="dotted-box" aria-label={`Utilization ${utilizationTotal} percent`}>
+                <div className="dotted-box dotted-box--row" aria-label={`Utilization ${utilizationTotal} percent`}>
                   <div className="progress-bg">
                     <div className="progress-fill" style={{ width: `${utilizationTotal}%` }} />
                   </div>
@@ -216,7 +216,7 @@ export default function Dashboard() {
               </article>
 
               {/* Daily Allowance vs Spent (right of row 1) */}
-              <article className="card card--tight">
+              <article className="card card--compact">
                 <h3 className="info-title">Daily Allowance vs. Spent</h3>
                 <p className="info-text">
                   Daily Allowance: <strong>{formatCurrency(dailyAllowance)}</strong> — Today:{" "}
@@ -237,7 +237,7 @@ export default function Dashboard() {
 
               {/* Remaining Funds (row 2 centered, full width container with max-width) */}
               <article
-                className="card card--tight"
+                className="card card--compact"
                 style={{
                   gridColumn: "1 / -1",
                   maxWidth: 560,
@@ -261,7 +261,7 @@ export default function Dashboard() {
           </section>
 
           {/* Category Breakdown with bars then centered Pie Chart */}
-          <section className="category-breakdown section" aria-labelledby="cat-h">
+          <section className="category-breakdown section" aria-labelledby="cat-h" style={{ marginTop: 28 }}>
             <div className="card-header">
               <h3 id="cat-h" className="card-title" style={{ fontSize: "1.1rem" }}>
                 Category Breakdown
