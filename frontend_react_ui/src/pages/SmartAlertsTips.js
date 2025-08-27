@@ -139,66 +139,128 @@ export default function SmartAlertsTips() {
     return list;
   }, [averageDailySpend, dailyAllowance, spentToday, totalBudget, spentTotal, expenses]);
 
-  // AI-like money saving tips (rule-based)
+  // AI-like money saving tips (rule-based) — dynamic and category-aware
   const tips = React.useMemo(() => {
-    const out = [];
+    const tipsOut = [];
     const colorsByLabel = Object.fromEntries(DEFAULT_CATEGORIES.map(c => [c.label, c.color]));
-    const totalSpent = categoriesTotals.reduce((a, b) => a + b.value, 0) || 1;
-    const byShare = categoriesTotals
-      .map(c => ({ ...c, share: c.value / totalSpent }))
+
+    // Totals and shares
+    const totalSpentAllTime = categoriesTotals.reduce((a, b) => a + (b.value || 0), 0);
+    const safeDen = totalSpentAllTime > 0 ? totalSpentAllTime : 1;
+    const ranked = categoriesTotals
+      .map(c => ({ ...c, share: (c.value || 0) / safeDen }))
       .sort((a, b) => b.share - a.share);
 
-    // Top category tip
-    if (byShare[0]) {
-      const top = byShare[0];
-      out.push({
-        title: `High spend in ${top.label}`,
-        text: `About ${(top.share * 100).toFixed(0)}% of your spend is ${top.label.toLowerCase()}. Plan low-cost alternatives to reduce ${top.label.toLowerCase()} tomorrow.`,
-        color: colorsByLabel[top.label] || "#6b7280",
+    // Helper: get recent spend per category (last N expenses) to detect fresh spikes
+    const recentN = 10;
+    const recent = expenses.slice(0, recentN);
+    const recentTotals = recent.reduce((acc, e) => {
+      const k = e.category || "Misc";
+      acc[k] = (acc[k] || 0) + Number(e.amount || 0);
+      return acc;
+    }, {});
+    const recentTop = Object.entries(recentTotals).sort((a, b) => b[1] - a[1])[0];
+
+    // 1) Tip: Top category overall with actionable suggestion per category
+    if (ranked[0]) {
+      const top = ranked[0];
+      const label = top.label;
+      const pct = Math.round(top.share * 100);
+
+      const suggestionByCategory = {
+        Food: "Plan one meal as DIY or pick a fixed-price lunch. Carry a water bottle and snacks to avoid impulse buys.",
+        Transport: "Consider a day pass or bundle trips; walk short distances to cut per-ride costs.",
+        Shopping: "Set a souvenir cap and compare prices; batch shopping to a single window to avoid multiple small splurges.",
+        Entertainment: "Look up free museum hours, parks, or community events to balance paid activities.",
+        Misc: "Review small recurring add-ons; keep a small buffer and avoid ATM fees by planning cash needs.",
+      };
+      tipsOut.push({
+        title: `Top spend: ${label} (${pct}% of total)`,
+        text: suggestionByCategory[label] || "Plan lower-cost alternatives and batch discretionary spend to reduce this category.",
+        color: colorsByLabel[label] || "#6b7280",
       });
     }
 
-    // Food specific
+    // 2) Tip: Recent spike focus (if a category surged in the last few entries)
+    if (recentTop && recent.length >= 3) {
+      const [label, amt] = recentTop;
+      if (amt > 0) {
+        tipsOut.push({
+          title: `Recent spike in ${label}`,
+          text: `Your last ${Math.min(recent.length, recentN)} expenses lean toward ${label.toLowerCase()}. Plan a no-${label.toLowerCase()} half-day to rebalance.`,
+          color: colorsByLabel[label] || "#6b7280",
+        });
+      }
+    }
+
+    // 3) Tip: If today's spending is high vs. allowance, give targeted advice against the top active category today
+    if (dailyAllowance > 0 && spentToday > 0) {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const todayTotals = expenses
+        .filter(e => e.date === todayStr)
+        .reduce((acc, e) => {
+          const k = e.category || "Misc";
+          acc[k] = (acc[k] || 0) + Number(e.amount || 0);
+          return acc;
+        }, {});
+      const topToday = Object.entries(todayTotals).sort((a, b) => b[1] - a[1])[0];
+      const todayPct = Math.round((spentToday / dailyAllowance) * 100);
+      if (topToday && todayPct >= 80) {
+        const [label] = topToday;
+        const microAdvice = {
+          Food: "Pick one affordable meal and one splurge; skip desserts/drinks to stay within plan.",
+          Transport: "Combine routes and avoid peak-time premiums; consider walking short legs.",
+          Shopping: "Delay purchases 24h; add to a list and buy only if it still matters tomorrow.",
+          Entertainment: "Swap one paid activity with a free local experience.",
+          Misc: "Hold non-urgent buys until tomorrow to keep today under control.",
+        };
+        tipsOut.push({
+          title: `Close to today's limit`,
+          text: `${todayPct}% of daily budget used. ${microAdvice[label] || "Trim one discretionary item to keep today on track."}`,
+          color: "#246BFD",
+        });
+      }
+    }
+
+    // 4) Tip: If Food alone exceeds daily allowance (frequent traveler pain point)
     const food = categoriesTotals.find(c => c.label === "Food");
-    if (food && food.value > dailyAllowance) {
-      out.push({
-        title: "Food spending exceeds daily allowance",
-        text: "Try a grocery pickup or fixed-price lunch menu to lower costs.",
+    if (food && dailyAllowance > 0 && food.value > dailyAllowance) {
+      tipsOut.push({
+        title: "Food overshoot vs daily allowance",
+        text: "Try a grocery pickup for breakfast items and target fixed-price lunch menus; set a per-meal cap.",
         color: colorsByLabel["Food"] || "#ffd600",
       });
     }
 
-    // Transport optimization
-    const transport = categoriesTotals.find(c => c.label === "Transport");
-    if (transport && transport.value > 0) {
-      out.push({
-        title: "Transport optimization",
-        text: "Bundle errands or use a day pass/public transit to cut per-trip fares.",
-        color: colorsByLabel["Transport"] || "#22c55e",
+    // 5) Tip: If total budget utilization is high, suggest global throttle
+    const totalPct = totalBudget > 0 ? Math.round((spentTotal / totalBudget) * 100) : 0;
+    if (totalPct >= 80 && spentTotal < totalBudget) {
+      tipsOut.push({
+        title: "Near your total budget",
+        text: "Pick a ‘low-spend’ day: free activities + walking + set-and-forget meal plan.",
+        color: "#111827",
       });
     }
 
-    // Entertainment balance
-    const ent = categoriesTotals.find(c => c.label === "Entertainment");
-    if (ent && ent.value > 0) {
-      out.push({
-        title: "Free entertainment options",
-        text: "Check free museum days, parks, or community events to balance paid activities.",
-        color: colorsByLabel["Entertainment"] || "#3b82f6",
-      });
-    }
-
-    // If no specific signal, add general tip
-    if (out.length === 0) {
-      out.push({
+    // Fallback: Always show at least one general tip
+    if (tipsOut.length === 0) {
+      tipsOut.push({
         title: "Small changes, big impact",
-        text: "Track categories daily, set micro-goals, and batch costly activities to stay on plan.",
+        text: "Set tiny daily targets per category and batch paid activities every other day to reduce drift.",
         color: "#6b7280",
       });
     }
 
-    return out.slice(0, 4);
-  }, [categoriesTotals, dailyAllowance]);
+    // De-duplicate similar titles while keeping first occurrence
+    const seen = new Set();
+    const deduped = tipsOut.filter(t => {
+      if (seen.has(t.title)) return false;
+      seen.add(t.title);
+      return true;
+    });
+
+    return deduped.slice(0, 5);
+  }, [categoriesTotals, expenses, dailyAllowance, spentToday, spentTotal, totalBudget]);
 
   // Plan My Day
   const [dayBudget, setDayBudget] = React.useState(80);
@@ -364,9 +426,9 @@ export default function SmartAlertsTips() {
 
           <div className="card-header" style={{ paddingBottom: 2 }}>
             <h2 className="card-title">AI-powered Tips</h2>
-            <p className="card-subtext">Simple suggestions to help you save more, powered by local rules.</p>
+            <p className="card-subtext">Contextual, category-aware tips that update as you log expenses.</p>
             <small className="hint">
-              Placeholder: category-based AI tips will be enhanced with backend-driven insights.
+              These tips are generated from local rules analyzing your recent and cumulative spending.
             </small>
           </div>
 
@@ -386,8 +448,8 @@ export default function SmartAlertsTips() {
               ))}
               {tips.length === 0 && (
                 <article className="info-card card" style={{ gridColumn: "span 12" }}>
-                  <h4 className="info-title">Tips placeholder</h4>
-                  <p className="info-text">Tips will appear here once data is available.</p>
+                  <h4 className="info-title">Tips will appear here</h4>
+                  <p className="info-text">Log a few expenses to receive personalized suggestions.</p>
                 </article>
               )}
             </div>
