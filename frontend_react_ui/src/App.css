@@ -728,7 +728,44 @@ html::before, body::before, .App::before {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px 0 8px;
+  padding: 12px 0 4px; /* tighter for economy */
+}
+
+/* Category list beneath pie */
+.category-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+.category-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff, #f9fafb);
+  border: 1px solid var(--gray-100);
+}
+.category-list-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--black);
+}
+.category-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.04);
+}
+.category-name {
+  font-size: 0.95rem;
+}
+.category-amount {
+  font-weight: 800;
+  color: var(--gray-700);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Footer */

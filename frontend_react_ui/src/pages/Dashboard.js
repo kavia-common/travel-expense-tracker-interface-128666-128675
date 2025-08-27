@@ -6,74 +6,34 @@ import "../App.css";
  * arranged per design notes:
  * - Row 1: Total Budget vs. Spent + Daily Allowance vs. Spent (two-column row)
  * - Row 2: Remaining Funds (single card centered)
- * - Category Breakdown: horizontal bars, then a centered Pie Chart
+ * - Category Breakdown: single Pie Chart with hover values and a list of categories with amounts below
  */
 
-// Basic in-file horizontal bar chart (canvas) to keep bundle light.
-function MiniBarChart({ data, colors, width = 600, height = 260, label = "Breakdown" }) {
-  const canvasRef = React.useRef(null);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    const ctx = canvas.getContext("2d");
-    ctx.scale(dpr, dpr);
-
-    // Clear
-    ctx.clearRect(0, 0, width, height);
-
-    // Padding/layout
-    const padding = { top: 24, right: 16, bottom: 24, left: 120 };
-    const chartW = width - padding.left - padding.right;
-    const chartH = height - padding.top - padding.bottom;
-
-    const maxVal = Math.max(1, ...data.map((d) => d.value));
-    const barGap = 10;
-    const barH = Math.max(10, Math.min(28, (chartH - barGap * (data.length - 1)) / data.length));
-
-    ctx.font = "12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell";
-    ctx.textBaseline = "middle";
-
-    data.forEach((d, i) => {
-      const y = padding.top + i * (barH + barGap);
-      const w = (d.value / maxVal) * chartW;
-
-      // Label
-      ctx.fillStyle = "#3d3d3d";
-      ctx.fillText(d.label, 10, y + barH / 2);
-
-      // Track
-      ctx.fillStyle = "#f3f4f6";
-      ctx.fillRect(padding.left, y, chartW, barH);
-
-      // Bar
-      ctx.fillStyle = colors[i % colors.length];
-      ctx.fillRect(padding.left, y, w, barH);
-
-      // Value (at end of bar)
-      ctx.fillStyle = "#0a0a0a";
-      ctx.fillText(`$${Math.round(d.value).toLocaleString()}`, padding.left + w + 8, y + barH / 2);
-    });
-
-    // Title
-    ctx.fillStyle = "#0a0a0a";
-    ctx.font = "bold 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell";
-    ctx.fillText(label, padding.left, 16);
-  }, [data, colors, width, height, label]);
-
-  return <canvas aria-label={label} role="img" ref={canvasRef} />;
-}
 
 // Minimal Pie Chart using canvas; centered via parent wrapper.
-function MiniPieChart({ data, colors, size = 300, label = "Category Shares" }) {
+function MiniPieChart({ data, colors, size = 300 }) {
+  /**
+   * Canvas donut chart with hover. On hover over a segment, draw the amount
+   * on top of that arc using the segment color for the text background.
+   */
   const canvasRef = React.useRef(null);
+  const [hoverIndex, setHoverIndex] = React.useState(null);
+
   const total = data.reduce((acc, d) => acc + d.value, 0) || 1;
 
+  // Precompute segment angles for hit testing
+  const segments = React.useMemo(() => {
+    let start = -Math.PI / 2;
+    return data.map((d) => {
+      const angle = (d.value / total) * Math.PI * 2;
+      const seg = { start, end: start + angle, value: d.value };
+      start += angle;
+      return seg;
+    });
+  }, [data, total]);
+
+  // Draw chart (and hover overlay)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -88,41 +48,141 @@ function MiniPieChart({ data, colors, size = 300, label = "Category Shares" }) {
     const cx = size / 2;
     const cy = size / 2;
     const r = (size / 2) * 0.9;
+    const innerR = r * 0.55;
 
     // Clear
     ctx.clearRect(0, 0, size, size);
 
-    // Draw pie
-    let start = -Math.PI / 2;
-    data.forEach((d, i) => {
-      const slice = (d.value / total) * Math.PI * 2;
-      const end = start + slice;
-
+    // Draw slices
+    segments.forEach((seg, i) => {
       ctx.beginPath();
       ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, r, start, end);
+      ctx.arc(cx, cy, r, seg.start, seg.end);
       ctx.closePath();
       ctx.fillStyle = colors[i % colors.length];
       ctx.fill();
-
-      start = end;
     });
 
-    // Inner hole to create donut look (optional, improves aesthetics)
+    // Donut hole
     ctx.beginPath();
     ctx.fillStyle = "#ffffff";
-    ctx.arc(cx, cy, r * 0.55, 0, Math.PI * 2);
+    ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
     ctx.fill();
 
-    // Title
-    ctx.fillStyle = "#0a0a0a";
-    ctx.font = "bold 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(label, cx, cy);
-  }, [data, colors, size, label, total]);
+    // Hover label if any
+    if (hoverIndex !== null && segments[hoverIndex]) {
+      const seg = segments[hoverIndex];
+      const mid = (seg.start + seg.end) / 2;
+      const ringR = (r + innerR) / 2;
 
-  return <canvas aria-label={`${label}. Total ${total}.`} role="img" ref={canvasRef} />;
+      const tx = cx + Math.cos(mid) * ringR;
+      const ty = cy + Math.sin(mid) * ringR;
+
+      const amount = `$${Math.round(data[hoverIndex].value).toLocaleString()}`;
+      const color = colors[hoverIndex % colors.length];
+
+      // Draw rounded pill background directly on arc center
+      ctx.font = "bold 12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell";
+      const textW = ctx.measureText(amount).width;
+      const padX = 8;
+      const padY = 4;
+      const pillW = textW + padX * 2;
+      const pillH = 20;
+      const rx = tx - pillW / 2;
+      const ry = ty - pillH / 2;
+      const radius = 10;
+
+      // Semi-transparent colored background to ensure readability
+      ctx.beginPath();
+      ctx.moveTo(rx + radius, ry);
+      ctx.arcTo(rx + pillW, ry, rx + pillW, ry + pillH, radius);
+      ctx.arcTo(rx + pillW, ry + pillH, rx, ry + pillH, radius);
+      ctx.arcTo(rx, ry + pillH, rx, ry, radius);
+      ctx.arcTo(rx, ry, rx + pillW, ry, radius);
+      ctx.closePath();
+      ctx.fillStyle = color + "CC"; // add alpha
+      ctx.fill();
+
+      // Text
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(amount, tx, ty);
+    }
+  }, [data, colors, size, segments, hoverIndex]);
+
+  // Hit testing on mouse move
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const handleMove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const cx = canvas.clientWidth / 2;
+      const cy = canvas.clientHeight / 2;
+      const r = (canvas.clientWidth / 2) * 0.9;
+      const innerR = r * 0.55;
+
+      const dx = x - cx;
+      const dy = y - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < innerR || dist > r) {
+        if (hoverIndex !== null) setHoverIndex(null);
+        return;
+      }
+
+      let angle = Math.atan2(dy, dx); // -PI..PI
+      // convert to our start reference (-PI/2)
+      angle -= -Math.PI / 2;
+      if (angle < 0) angle += Math.PI * 2;
+
+      // Convert back to absolute angle space used in segments (starting at -PI/2)
+      const absoluteAngle = angle - Math.PI / 2;
+
+      // Since segments are stored in -PI/2 space already, normalize angle accordingly
+      let found = null;
+      segments.forEach((seg, i) => {
+        // normalize: ensure angle in [seg.start, seg.end) considering wrap
+        const a = seg.start;
+        const b = seg.end;
+        // Because our constructed angle above is equivalent to (raw atan2) already aligned with seg.start,
+        // we can compare using the raw atan2 result:
+        let theta = Math.atan2(dy, dx); // -PI..PI
+        if (theta < -Math.PI / 2) theta += Math.PI * 2; // wrap so start at -PI/2
+        if (theta >= seg.start && theta < seg.end) {
+          found = i;
+        }
+      });
+
+      if (found !== null) {
+        if (hoverIndex !== found) setHoverIndex(found);
+      } else if (hoverIndex !== null) {
+        setHoverIndex(null);
+      }
+    };
+
+    const handleLeave = () => setHoverIndex(null);
+
+    canvas.addEventListener("mousemove", handleMove);
+    canvas.addEventListener("mouseleave", handleLeave);
+    return () => {
+      canvas.removeEventListener("mousemove", handleMove);
+      canvas.removeEventListener("mouseleave", handleLeave);
+    };
+  }, [segments, hoverIndex]);
+
+  return (
+    <canvas
+      aria-label={`Category shares donut. Total ${total}. Hover segments to see amount.`}
+      role="img"
+      ref={canvasRef}
+      style={{ cursor: "pointer" }}
+    />
+  );
 }
 
 // PUBLIC_INTERFACE
@@ -260,7 +320,7 @@ export default function Dashboard() {
             </div>
           </section>
 
-          {/* Category Breakdown with bars then centered Pie Chart */}
+          {/* Category Breakdown: Only a donut pie + list of categories/amounts */}
           <section className="category-breakdown section" aria-labelledby="cat-h" style={{ marginTop: 28 }}>
             <div className="card-header">
               <h3 id="cat-h" className="card-title" style={{ fontSize: "1.1rem" }}>
@@ -268,13 +328,33 @@ export default function Dashboard() {
               </h3>
               <p className="card-subtext">Food, Transport, Shopping, Entertainment, Misc.</p>
             </div>
-            <div style={{ overflowX: "auto" }}>
-              <MiniBarChart data={categories} colors={colors} width={800} height={260} label="Spending by Category" />
+
+            {/* Centered Pie Chart */}
+            <div className="pie-wrapper">
+              <MiniPieChart data={categories} colors={colors} size={300} />
             </div>
 
-            {/* Centered Pie Chart wrapper below the bars */}
-            <div className="pie-wrapper">
-              <MiniPieChart data={categories} colors={colors} size={300} label="Category Shares" />
+            {/* List of categories with amounts */}
+            <div className="category-list">
+              {categories.map((c, i) => (
+                <div key={c.label} className="category-list-row">
+                  <div className="category-list-left">
+                    <span
+                      aria-hidden="true"
+                      className="category-dot"
+                      style={{ background: colors[i % colors.length] }}
+                    />
+                    <span className="category-name">{c.label}</span>
+                  </div>
+                  <div className="category-amount">
+                    {new Intl.NumberFormat(undefined, {
+                      style: "currency",
+                      currency: "USD",
+                      maximumFractionDigits: 0,
+                    }).format(c.value)}
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
