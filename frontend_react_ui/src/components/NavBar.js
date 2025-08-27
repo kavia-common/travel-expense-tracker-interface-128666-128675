@@ -30,10 +30,10 @@ export default function NavBar() {
         }}
       >
         <a href="/" className="title" style={{ fontWeight: 800 }}>
-          Trip Setup
+          Trip Tracker
         </a>
         <div style={{ display: "flex", gap: 10 }}>
-          <a className="chip" href="/" title="Trip Setup">
+          <a className="chip" href="/" title="Trip Tracker">
             Setup
           </a>
           <a className="chip" href="/expenses" title="Expense Logging">

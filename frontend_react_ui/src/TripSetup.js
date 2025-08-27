@@ -29,7 +29,7 @@ export default function TripSetup() {
   const [friends, setFriends] = useState([]);
 
   useEffect(() => {
-    document.title = `Trip Setup${tripName ? ` - ${tripName}` : ''}`;
+    document.title = `Trip Tracker${tripName ? ` - ${tripName}` : ''}`;
   }, [tripName]);
 
   const tripSummary = useMemo(() => {
@@ -106,7 +106,7 @@ export default function TripSetup() {
       <section className="hero">
         <div className="hero-overlay" />
         <div className="hero-content container">
-          <h1 className="headline">Trip Setup</h1>
+          <h1 className="headline">Trip Tracker</h1>
           <p className="subtext">
             Plan your travel budget with clarity. Set your trip details, daily
             spending goals, and dates. Clean, simple, and flexible.
