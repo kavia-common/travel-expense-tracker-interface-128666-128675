@@ -1,10 +1,11 @@
 import React from "react";
 import "../App.css";
+import { ExpensesContext } from "../context/ExpensesContext";
 
 /**
  * ExpenseLogging page provides a quick-add form to log expenses.
  * Fields: Amount, Category (dropdown), Notes (optional), Date (defaults to today), Group Mode (assign to People).
- * Minimal, clean layout matching app style. Uses in-memory event dispatch for "real-time" integration.
+ * Minimal, clean layout matching app style. Uses shared context for real-time integration.
  */
 
 // Utility to format date as yyyy-mm-dd for input[type="date"]
@@ -34,6 +35,7 @@ export default function ExpenseLogging() {
   const [groupMode, setGroupMode] = React.useState(false);
   const [peopleInput, setPeopleInput] = React.useState("");
   const [people, setPeople] = React.useState([]);
+  const { addExpense } = React.useContext(ExpensesContext);
 
   React.useEffect(() => {
     document.title = "Expense Logging";
@@ -90,10 +92,8 @@ export default function ExpenseLogging() {
       createdAt: new Date().toISOString(),
     };
 
-    // Dispatch a custom event so other pages (e.g., Dashboard) can respond in real-time.
-    // Consumers can listen to 'expense:added' to update summaries instantly.
-    const evt = new CustomEvent("expense:added", { detail: payload });
-    window.dispatchEvent(evt);
+    // Add via shared context to trigger real-time updates in Dashboard
+    addExpense(payload);
 
     // Provide minimal feedback and reset
     resetForm();

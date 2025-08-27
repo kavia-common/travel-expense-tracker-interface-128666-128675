@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import "../App.css";
+import { ExpensesContext, DEFAULT_CATEGORIES } from "../context/ExpensesContext";
 
 /**
  * Dashboard page shows overview of budget vs. spending with minimal card UI,
@@ -8,8 +9,6 @@ import "../App.css";
  * - Row 2: Remaining Funds (single card centered)
  * - Category Breakdown: single Pie Chart with hover values and a list of categories with amounts below
  */
-
-
 
 // Minimal Pie Chart using canvas; centered via parent wrapper.
 function MiniPieChart({ data, colors, size = 300 }) {
@@ -185,27 +184,24 @@ function MiniPieChart({ data, colors, size = 300 }) {
   );
 }
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * Dashboard consumes ExpensesContext to render live totals and category breakdown.
+ */
 export default function Dashboard() {
-  // Demo data; in future connect to real store/backend
-  const totalBudget = 1500;
-  const spentTotal = 620;
-  const dailyAllowance = 120;
-  const spentToday = 85;
+  const {
+    totalBudget,
+    dailyAllowance,
+    spentTotal,
+    spentToday,
+    categoriesTotals,
+  } = useContext(ExpensesContext);
 
-  const categories = useMemo(
-    () => [
-      { label: "Food", value: 240 },
-      { label: "Transport", value: 120 },
-      { label: "Shopping", value: 140 },
-      { label: "Entertainment", value: 90 },
-      { label: "Misc", value: 30 },
-    ],
-    []
-  );
+  // Ensure categories align with default order/colors for consistency
+  const categories = useMemo(() => categoriesTotals, [categoriesTotals]);
 
-  const remaining = Math.max(0, totalBudget - spentTotal);
-  const colors = ["#ffd600", "#22c55e", "#f43f5e", "#3b82f6", "#6b7280"];
+  const remaining = Math.max(0, (totalBudget || 0) - (spentTotal || 0));
+  const colors = DEFAULT_CATEGORIES.map((c) => c.color);
 
   useEffect(() => {
     document.title = "Dashboard - Trip Overview";
