@@ -29,6 +29,7 @@ export default function NavBar() {
         <div style={{ display: "flex", gap: 10 }}>
           <a className="chip" href="/" title="Trip Setup">Setup</a>
           <a className="chip" href="/dashboard" title="Dashboard">Dashboard</a>
+          <a className="chip" href="/expenses" title="Expense Logging">Expenses</a>
         </div>
       </div>
     </nav>

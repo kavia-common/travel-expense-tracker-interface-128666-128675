@@ -265,7 +265,8 @@ html::before, body::before, .App::before {
 .dot-blue  { background: var(--blue); }
 
 .input,
-.input[type="date"] {
+.input[type="date"],
+select.input {
   appearance: none;
   width: 100%;
   padding: 14px 14px;
@@ -278,11 +279,13 @@ html::before, body::before, .App::before {
   transition: box-shadow var(--elevate), border-color var(--elevate), transform var(--press), background var(--elevate);
 }
 .input:hover,
-.input[type="date"]:hover {
+.input[type="date"]:hover,
+select.input:hover {
   border-color: var(--gray-300);
 }
 .input:focus,
-.input[type="date"]:focus {
+.input[type="date"]:focus,
+select.input:focus {
   border-color: var(--blue);
   box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.14), 0 8px 16px rgba(17,24,39,0.06);
   background: #fff;
