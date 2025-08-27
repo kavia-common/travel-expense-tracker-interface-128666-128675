@@ -4,7 +4,7 @@ import { ExpensesContext, DEFAULT_CATEGORIES } from "../context/ExpensesContext"
 
 /**
  * SmartAlertsTips page
- * - Live Overspending Alerts derived from ExpensesContext (spentToday vs dailyAllowance, spentTotal vs totalBudget, category spikes)
+ * - Live Overspending Alerts derived from ExpensesContext (spentToday vs average daily spend and dailyAllowance, totalBudget, category spikes)
  * - AI-powered Tips (rule-based local heuristics)
  * - "Plan My Day" budget entry UI: user enters budget; we propose a simple day plan across categories
  */
@@ -12,6 +12,21 @@ import { ExpensesContext, DEFAULT_CATEGORIES } from "../context/ExpensesContext"
 // Local helpers
 function currency(n) {
   return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n || 0);
+}
+
+// Helper: group expenses by yyyy-mm-dd and compute stats
+function computeDailyStats(expenses) {
+  const map = new Map();
+  for (const e of expenses) {
+    const d = e.date;
+    if (!d) continue;
+    map.set(d, (map.get(d) || 0) + Number(e.amount || 0));
+  }
+  const days = [...map.keys()];
+  const totals = [...map.values()];
+  const sum = totals.reduce((a, b) => a + b, 0);
+  const avg = days.length > 0 ? sum / days.length : 0;
+  return { daysCount: days.length, average: avg, byDay: map, total: sum };
 }
 
 // PUBLIC_INTERFACE
@@ -29,11 +44,29 @@ export default function SmartAlertsTips() {
     document.title = "Smart Alerts & Tips";
   }, []);
 
+  // Compute historical average daily spend from context
+  const { average: averageDailySpend } = React.useMemo(() => computeDailyStats(expenses), [expenses]);
+
+  // Threshold: show prominent warning if today's spending exceeds average by 25% (configurable)
+  const OVERRUN_THRESHOLD = 0.25;
+
   // Overspending alerts
   const alerts = React.useMemo(() => {
     const list = [];
 
-    // Today usage alert
+    // A) New: Compare today's spend to historical average daily spend
+    const exceedsAvg = averageDailySpend > 0 ? (spentToday - averageDailySpend) / averageDailySpend : 0;
+    if (averageDailySpend > 0 && exceedsAvg >= OVERRUN_THRESHOLD) {
+      const overPct = Math.round(exceedsAvg * 100);
+      list.push({
+        level: "critical",
+        title: "Overspending trend detected",
+        detail: `You’ve spent ${overPct}% more than your average daily spend today (${currency(spentToday)} vs avg ${currency(averageDailySpend)}).`,
+        kind: "avgDailyOverrun",
+      });
+    }
+
+    // B) Today usage alert against daily allowance
     const todayPct = dailyAllowance > 0 ? Math.round((spentToday / dailyAllowance) * 100) : 0;
     if (todayPct >= 120) {
       list.push({
@@ -55,7 +88,7 @@ export default function SmartAlertsTips() {
       });
     }
 
-    // Total usage alert
+    // C) Total usage alert
     const totalPct = totalBudget > 0 ? Math.round((spentTotal / totalBudget) * 100) : 0;
     if (totalPct >= 110) {
       list.push({
@@ -77,7 +110,7 @@ export default function SmartAlertsTips() {
       });
     }
 
-    // Category spike: detect last 5 expenses concentration in one category
+    // D) Category spike: detect last 5 expenses concentration in one category
     const recent = expenses.slice(0, 5);
     if (recent.length >= 3) {
       const counts = new Map();
@@ -104,7 +137,7 @@ export default function SmartAlertsTips() {
     }
 
     return list;
-  }, [dailyAllowance, spentToday, totalBudget, spentTotal, expenses]);
+  }, [averageDailySpend, dailyAllowance, spentToday, totalBudget, spentTotal, expenses]);
 
   // AI-like money saving tips (rule-based)
   const tips = React.useMemo(() => {
@@ -254,9 +287,29 @@ export default function SmartAlertsTips() {
             <p className="card-subtext">
               Based on your current spending and budgets. Today’s utilization: <strong>{utilizationToday}%</strong>
             </p>
-            <small className="hint" aria-live="polite">
-              Placeholder: live alerts will evolve with richer rules and visual states.
-            </small>
+            {/* Prominent warning for average daily overrun */}
+            {averageDailySpend > 0 && spentToday > averageDailySpend * (1 + OVERRUN_THRESHOLD) && (
+              <div
+                className="dotted-box"
+                role="alert"
+                aria-live="assertive"
+                style={{
+                  marginTop: 10,
+                  borderColor: "rgba(244,63,94,0.9)",
+                  background: "linear-gradient(180deg, #fff5f7, #ffffff)",
+                  alignItems: "flex-start",
+                  flexDirection: "column",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="dot" style={{ background: "var(--pink)" }} aria-hidden="true" />
+                  <strong>Today exceeds average daily spend</strong>
+                </div>
+                <p className="info-text" style={{ margin: 0 }}>
+                  You’ve spent {Math.round(((spentToday - averageDailySpend) / averageDailySpend) * 100)}% more than average today ({currency(spentToday)} vs avg {currency(averageDailySpend)}).
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="section section--flush-top" style={{ display: "grid", gap: 10 }}>
