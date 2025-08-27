@@ -254,6 +254,9 @@ export default function SmartAlertsTips() {
             <p className="card-subtext">
               Based on your current spending and budgets. Today’s utilization: <strong>{utilizationToday}%</strong>
             </p>
+            <small className="hint" aria-live="polite">
+              Placeholder: live alerts will evolve with richer rules and visual states.
+            </small>
           </div>
 
           <div className="section section--flush-top" style={{ display: "grid", gap: 10 }}>
@@ -296,6 +299,12 @@ export default function SmartAlertsTips() {
                 <div className="info-text" style={{ margin: 0 }}>{a.detail}</div>
               </div>
             ))}
+            {alerts.length === 0 && (
+              <div className="dotted-box" role="status">
+                <span className="summary-label">No alerts</span>
+                <span className="pill">All clear</span>
+              </div>
+            )}
           </div>
 
           <div className="rule" />
@@ -303,6 +312,9 @@ export default function SmartAlertsTips() {
           <div className="card-header" style={{ paddingBottom: 2 }}>
             <h2 className="card-title">AI-powered Tips</h2>
             <p className="card-subtext">Simple suggestions to help you save more, powered by local rules.</p>
+            <small className="hint">
+              Placeholder: category-based AI tips will be enhanced with backend-driven insights.
+            </small>
           </div>
 
           <section className="section" aria-labelledby="tips-h">
@@ -319,6 +331,12 @@ export default function SmartAlertsTips() {
                   <p className="info-text" style={{ marginTop: 4 }}>{t.text}</p>
                 </article>
               ))}
+              {tips.length === 0 && (
+                <article className="info-card card" style={{ gridColumn: "span 12" }}>
+                  <h4 className="info-title">Tips placeholder</h4>
+                  <p className="info-text">Tips will appear here once data is available.</p>
+                </article>
+              )}
             </div>
           </section>
 
@@ -327,6 +345,9 @@ export default function SmartAlertsTips() {
           <div className="card-header" style={{ paddingBottom: 2 }}>
             <h2 className="card-title">Plan My Day</h2>
             <p className="card-subtext">Enter a day budget and get a simple, balanced plan.</p>
+            <small className="hint">
+              Placeholder: enter a value and click Generate Plan to view a suggested allocation.
+            </small>
           </div>
 
           <section className="section" aria-labelledby="pmd-h">
@@ -359,6 +380,18 @@ export default function SmartAlertsTips() {
               <button type="button" className="btn-primary" onClick={generatePlan}>Generate Plan</button>
               <a className="btn-secondary" href="/expenses" title="Log an expense">Log Expense →</a>
             </div>
+
+            {!plan && (
+              <div className="summary card" aria-live="polite" style={{ marginTop: 14 }}>
+                <div className="summary-row">
+                  <span className="summary-label">Plan Preview</span>
+                  <span className="summary-value">No plan generated yet</span>
+                </div>
+                <p className="info-text" style={{ marginTop: 6 }}>
+                  Enter a budget above and click “Generate Plan” to see a suggested split for the day.
+                </p>
+              </div>
+            )}
 
             {plan && (
               <div className="summary card" style={{ marginTop: 14 }}>
