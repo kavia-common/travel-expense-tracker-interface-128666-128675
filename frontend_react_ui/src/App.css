@@ -515,22 +515,24 @@ html::before, body::before, .App::before {
 
 /* Info cards section */
 .info-cards {
-  margin-top: 40px;
-  padding: 12px;
+  margin-top: 48px; /* increased for better breathing room */
+  padding: 16px; /* harmonized padding */
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 12px;
+  gap: 16px; /* consistent gap rhythm */
 }
 
 .info-card {
   grid-column: span 12;
-  padding: 18px;
+  padding: 20px; /* upgraded padding for clarity */
   position: relative;
   overflow: hidden;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,1));
   backdrop-filter: blur(2px);
   border: 1px solid var(--gray-100);
+  border-radius: var(--radius); /* consistent rounding */
+  box-shadow: var(--shadow-sm); /* soft elevation baseline */
 }
 .info-card::after {
   content: "";
@@ -556,9 +558,10 @@ html::before, body::before, .App::before {
 }
 
 .info-title {
-  margin: 0 0 6px 0;
+  margin: 0 0 8px 0; /* slightly larger spacing */
   font-size: 1.1rem;
   font-weight: 800;
+  letter-spacing: -0.01em;
 }
 .info-text {
   margin: 0;
@@ -566,9 +569,123 @@ html::before, body::before, .App::before {
   font-size: 0.98rem;
 }
 
+/* Dashboard refinements */
+/* Section wrappers for consistent spacing and balance */
+.section {
+  margin-top: 18px;
+}
+.section--flush-top {
+  margin-top: 0;
+}
+
+/* Harmonized card utilities */
+.card {
+  border-radius: var(--radius-lg);
+}
+.card--tight {
+  padding: 16px;
+}
+.card--loose {
+  padding: 24px;
+}
+
+/* Subtle separators */
+.rule {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(10,10,10,0.06), rgba(10,10,10,0.06));
+  margin: 12px 0;
+}
+
+/* Overview layout consistent with notes */
+.overview {
+  background: var(--gray-100);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.overview .header {
+  margin-bottom: 12px;
+}
+.overview .header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.overview .header p {
+  margin: 4px 0 0 0;
+  color: var(--gray-500);
+  font-size: 0.95rem;
+}
+.overview .cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 767px) {
+  .overview .cards { grid-template-columns: 1fr; }
+}
+
+/* Dotted containers and progress primitives */
+.dotted-box {
+  border: 2px dotted rgba(28,28,28,0.6);
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(180deg, #fafafa, #fff);
+}
+.progress-bg {
+  background: var(--gray-100);
+  height: 8px;
+  border-radius: 8px;
+  width: 100%;
+  overflow: hidden;
+}
+.progress-fill {
+  background: var(--black);
+  height: 100%;
+  border-radius: 8px;
+  width: var(--progress, 0%);
+  transition: width var(--elevate);
+}
+
+/* Footer rows and pills */
+.footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.pill {
+  background: var(--gray-100);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--black);
+}
+
+/* Category breakdown specific */
+.category-breakdown {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border-radius: var(--radius);
+  padding: 18px;
+  border: 1px solid var(--gray-100);
+  box-shadow: var(--shadow-sm);
+}
+.category-breakdown .card-header {
+  padding: 0 0 8px 0;
+}
+.pie-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0 8px;
+}
+
 /* Footer */
 .footer {
-  margin: 26px auto 60px;
+  margin: 32px auto 64px; /* slightly increased for balance */
   padding: 0 16px;
 }
 

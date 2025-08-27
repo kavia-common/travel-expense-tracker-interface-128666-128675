@@ -161,7 +161,7 @@ export default function Dashboard() {
   return (
     <div className="App travel">
       {/* Soft hero */}
-      <section className="hero" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.9), #fff)" }}>
+      <section className="hero" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.92), #fff)" }}>
         <div className="hero-overlay" style={{ display: "none" }} />
         <div className="hero-content container">
           <h1 className="headline">Dashboard</h1>
@@ -179,27 +179,23 @@ export default function Dashboard() {
 
       {/* Floating metrics card */}
       <div className="floating-card-wrapper">
-        <div className="card floating-card">
-          <div className="card-header">
+        <div className="card floating-card card--loose">
+          <div className="card-header" style={{ paddingBottom: 6 }}>
             <h2 className="card-title">Overview</h2>
             <p className="card-subtext">Quick snapshot of your trip finances.</p>
           </div>
 
           {/* Overview cards grid per layout_mapping_and_implementation.md */}
-          <section className="overview" style={{ padding: "0 4px", background: "transparent" }} aria-labelledby="overview-h">
-            <h2 id="overview-h" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clipPath: "inset(50%)" }}>
-              Overview
-            </h2>
-            <div
-              className="cards"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                gap: 16,
-              }}
-            >
+          <section className="overview section section--flush-top" aria-labelledby="overview-h">
+            <header className="header">
+              <h2 id="overview-h" className="sr-only" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clipPath: "inset(50%)" }}>
+                Overview
+              </h2>
+            </header>
+
+            <div className="cards">
               {/* Total Budget vs Spent (left of row 1) */}
-              <article className="card" style={{ padding: 16 }} aria-live="polite">
+              <article className="card card--tight" aria-live="polite">
                 <h3 className="info-title">Total Budget vs. Spent</h3>
                 <p className="info-text">
                   Budget: <strong>{formatCurrency(totalBudget)}</strong> — Spent:{" "}
@@ -207,89 +203,44 @@ export default function Dashboard() {
                 </p>
 
                 {/* Dotted progress box */}
-                <div
-                  className="dotted-box"
-                  style={{
-                    border: "2px dotted rgba(28,28,28,0.6)",
-                    borderRadius: 14,
-                    padding: "8px 10px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                  }}
-                  aria-label={`Utilization ${utilizationTotal} percent`}
-                >
-                  <div className="progress-bg" style={{ background: "var(--gray-100)", height: 8, borderRadius: 8, width: "100%" }}>
-                    <div
-                      className="progress-fill"
-                      style={{
-                        background: "var(--black)",
-                        height: "100%",
-                        borderRadius: 8,
-                        width: `${utilizationTotal}%`,
-                        transition: "width 260ms ease",
-                      }}
-                    />
+                <div className="dotted-box" aria-label={`Utilization ${utilizationTotal} percent`}>
+                  <div className="progress-bg">
+                    <div className="progress-fill" style={{ width: `${utilizationTotal}%` }} />
                   </div>
                 </div>
 
-                <div className="footer-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div className="footer-row">
                   <span className="summary-label">Utilization</span>
-                  <span className="pill" style={{ background: "var(--gray-100)", padding: "4px 10px", borderRadius: 999, fontWeight: 800 }}>
-                    {utilizationTotal}%
-                  </span>
+                  <span className="pill">{utilizationTotal}%</span>
                 </div>
               </article>
 
               {/* Daily Allowance vs Spent (right of row 1) */}
-              <article className="card" style={{ padding: 16 }}>
+              <article className="card card--tight">
                 <h3 className="info-title">Daily Allowance vs. Spent</h3>
                 <p className="info-text">
                   Daily Allowance: <strong>{formatCurrency(dailyAllowance)}</strong> — Today:{" "}
                   <strong style={{ color: "var(--blue)" }}>{formatCurrency(spentToday)}</strong>
                 </p>
 
-                <div
-                  className="dotted-box"
-                  style={{
-                    border: "2px dotted rgba(28,28,28,0.6)",
-                    borderRadius: 14,
-                    padding: "8px 10px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                  }}
-                  aria-label={`Today's utilization ${utilizationToday} percent`}
-                >
-                  <div className="progress-bg" style={{ background: "var(--gray-100)", height: 8, borderRadius: 8, width: "100%" }}>
-                    <div
-                      className="progress-fill"
-                      style={{
-                        background: "var(--black)",
-                        height: "100%",
-                        borderRadius: 8,
-                        width: `${utilizationToday}%`,
-                        transition: "width 260ms ease",
-                      }}
-                    />
+                <div className="dotted-box" aria-label={`Today's utilization ${utilizationToday} percent`}>
+                  <div className="progress-bg">
+                    <div className="progress-fill" style={{ width: `${utilizationToday}%` }} />
                   </div>
                 </div>
 
-                <div className="footer-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div className="footer-row">
                   <span className="summary-label">Today’s Utilization</span>
-                  <span className="pill" style={{ background: "var(--gray-100)", padding: "4px 10px", borderRadius: 999, fontWeight: 800 }}>
-                    {utilizationToday}%
-                  </span>
+                  <span className="pill">{utilizationToday}%</span>
                 </div>
               </article>
 
               {/* Remaining Funds (row 2 centered, full width container with max-width) */}
               <article
-                className="card"
+                className="card card--tight"
                 style={{
-                  padding: 16,
                   gridColumn: "1 / -1",
-                  maxWidth: 520,
+                  maxWidth: 560,
                   margin: "0 auto",
                   width: "100%",
                 }}
@@ -299,39 +250,19 @@ export default function Dashboard() {
                   Remaining: <strong style={{ color: "var(--green)" }}>{formatCurrency(remaining)}</strong>
                 </p>
 
-                <div
-                  className="dotted-box"
-                  style={{
-                    border: "2px dotted rgba(28,28,28,0.6)",
-                    borderRadius: 14,
-                    padding: "8px 10px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 10,
-                  }}
-                >
-                  <span className="pill" style={{ background: "var(--gray-100)", padding: "4px 10px", borderRadius: 999, fontWeight: 800 }}>
-                    Cushion
-                  </span>
+                <div className="dotted-box" style={{ justifyContent: "space-between" }}>
+                  <span className="pill">Cushion</span>
                   <span className="summary-value accent" style={{ color: "var(--blue)", fontWeight: 800 }}>
                     {remaining > 0 ? "On Track" : "Exceeded"}
                   </span>
                 </div>
               </article>
             </div>
-
-            {/* Responsive rules inline for simplicity; mirror from notes */}
-            <style>{`
-              @media (max-width: 767px) {
-                .overview .cards { grid-template-columns: 1fr !important; }
-              }
-            `}</style>
           </section>
 
           {/* Category Breakdown with bars then centered Pie Chart */}
-          <section className="card" style={{ marginTop: 16, padding: 16 }} aria-labelledby="cat-h">
-            <div className="card-header" style={{ padding: "0 0 8px 0" }}>
+          <section className="category-breakdown section" aria-labelledby="cat-h">
+            <div className="card-header">
               <h3 id="cat-h" className="card-title" style={{ fontSize: "1.1rem" }}>
                 Category Breakdown
               </h3>
@@ -342,15 +273,12 @@ export default function Dashboard() {
             </div>
 
             {/* Centered Pie Chart wrapper below the bars */}
-            <div
-              className="pie-wrapper"
-              style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "16px 0 4px" }}
-            >
+            <div className="pie-wrapper">
               <MiniPieChart data={categories} colors={colors} size={300} label="Category Shares" />
             </div>
           </section>
 
-          <div className="actions" style={{ marginTop: 18 }}>
+          <div className="actions" style={{ marginTop: 22 }}>
             <a className="btn-secondary" href="/" title="Back to Trip Setup">
               ← Back to Trip Setup
             </a>
