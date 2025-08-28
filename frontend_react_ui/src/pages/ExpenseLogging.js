@@ -120,7 +120,6 @@ export default function ExpenseLogging() {
         <form className="card floating-card" onSubmit={handleSubmit}>
           <div className="card-header">
             <h2 className="card-title">Add an Expense</h2>
-            <p className="card-subtext">Fill in the details and save it to your trip.</p>
             {justSaved && (
               <div
                 role="status"
@@ -163,7 +162,6 @@ export default function ExpenseLogging() {
                   required
                 />
               </div>
-              <small className="hint">Enter the expense amount.</small>
             </div>
 
             {/* Category */}
@@ -184,7 +182,6 @@ export default function ExpenseLogging() {
                   </option>
                 ))}
               </select>
-              <small className="hint">Choose a category.</small>
             </div>
 
             {/* Date */}
@@ -200,7 +197,6 @@ export default function ExpenseLogging() {
                 onChange={(e) => setDate(e.target.value)}
                 aria-label="Expense date"
               />
-              <small className="hint">Defaults to today; adjust if needed.</small>
             </div>
 
             {/* Notes */}
@@ -217,7 +213,6 @@ export default function ExpenseLogging() {
                 onChange={(e) => setNotes(e.target.value)}
                 aria-label="Notes"
               />
-              <small className="hint">Optional: add a brief description.</small>
             </div>
 
             {/* Group Mode */}
