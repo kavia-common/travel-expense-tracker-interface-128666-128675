@@ -46,10 +46,10 @@ export default function NavBar() {
             alt=""
             aria-hidden="true"
             style={{
-              width: 24,
-              height: 24,
+              width: 28,
+              height: 28,
               objectFit: "contain",
-              borderRadius: 6,
+              borderRadius: 8,
             }}
           />
           <span>Trip Tracker</span>
