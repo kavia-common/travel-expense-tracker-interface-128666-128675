@@ -119,9 +119,7 @@ export default function TripSetup() {
         <form className="card floating-card" onSubmit={handleSubmit}>
           <div className="card-header">
             <h2 className="card-title">Your Trip</h2>
-            <p className="card-subtext">
-              Configure the essentials. You can adjust everything later.
-            </p>
+            {/* Removed instructional subtext per request */}
           </div>
 
           <div className="inputs-grid">
@@ -138,7 +136,7 @@ export default function TripSetup() {
                 onChange={(e) => setTripName(e.target.value)}
                 aria-label="Trip name"
               />
-              <small className="hint">A short title to recognize your trip.</small>
+              {/* Removed hint per request */}
             </div>
 
             <div className="field">
@@ -159,9 +157,7 @@ export default function TripSetup() {
                   aria-label="Total budget"
                 />
               </div>
-              <small className="hint">
-                The maximum you want to spend for the entire trip.
-              </small>
+              {/* Removed hint per request */}
             </div>
 
             <div className="field">
@@ -190,9 +186,7 @@ export default function TripSetup() {
                   +
                 </button>
               </div>
-              <small className="hint">
-                Your ideal spending limit per day.
-              </small>
+              {/* Removed hint per request */}
             </div>
 
             <div className="field">
@@ -207,7 +201,7 @@ export default function TripSetup() {
                 onChange={(e) => setStartDate(e.target.value)}
                 aria-label="Start date"
               />
-              <small className="hint">When your trip begins.</small>
+              {/* Removed hint per request */}
             </div>
 
             <div className="field">
@@ -222,7 +216,7 @@ export default function TripSetup() {
                 onChange={(e) => setEndDate(e.target.value)}
                 aria-label="End date"
               />
-              <small className="hint">When your trip finishes.</small>
+              {/* Removed hint per request */}
             </div>
 
             <div className="field friends-field">
@@ -272,9 +266,7 @@ export default function TripSetup() {
                   ))}
                 </div>
               )}
-              <small className="hint">
-                Invite friends to split costs. We’ll show per-person shares later.
-              </small>
+              {/* Removed hint per request */}
             </div>
           </div>
 
