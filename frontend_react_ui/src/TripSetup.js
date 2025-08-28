@@ -120,10 +120,11 @@ export default function TripSetup() {
               alt=""
               aria-hidden="true"
               style={{
-                width: 40,
-                height: 40,
+                width: 64,
+                height: 64,
                 objectFit: "contain",
-                borderRadius: 10,
+                borderRadius: 14,
+                boxShadow: "0 4px 14px rgba(0,0,0,0.10)",
               }}
             />
             <span>Trip Tracker</span>

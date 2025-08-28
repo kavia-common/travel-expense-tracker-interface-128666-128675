@@ -46,13 +46,16 @@ export default function NavBar() {
             alt=""
             aria-hidden="true"
             style={{
-              width: 28,
-              height: 28,
+              width: 44,
+              height: 44,
               objectFit: "contain",
-              borderRadius: 8,
+              borderRadius: 10,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
             }}
           />
-          <span>Trip Tracker</span>
+          <span style={{ fontSize: 18, lineHeight: 1, display: "inline-block" }}>
+            Trip Tracker
+          </span>
         </a>
         <div style={{ display: "flex", gap: 10 }}>
           <a className="chip" href="/" title="Trip Tracker">
