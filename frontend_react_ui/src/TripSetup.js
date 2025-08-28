@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './App.css';
+import appIcon from './assets/app-icon.png';
 
 /**
  * TripSetup page: original App content extracted for routing.
@@ -106,7 +107,27 @@ export default function TripSetup() {
       <section className="hero">
         <div className="hero-overlay" />
         <div className="hero-content container">
-          <h1 className="headline">Trip Tracker</h1>
+          <h1
+            className="headline"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            <img
+              src={appIcon}
+              alt=""
+              aria-hidden="true"
+              style={{
+                width: 40,
+                height: 40,
+                objectFit: "contain",
+                borderRadius: 10,
+              }}
+            />
+            <span>Trip Tracker</span>
+          </h1>
           <p className="subtext">
             Plan your travel budget with clarity. Set your trip details, daily
             spending goals, and dates. Clean, simple, and flexible.

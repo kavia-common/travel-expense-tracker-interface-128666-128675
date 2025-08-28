@@ -1,5 +1,6 @@
 import React from "react";
 import "../App.css";
+import appIcon from "../assets/app-icon.png";
 
 /**
  * Minimal top navigation bar with links to Trip Setup, Expense Logging, and Dashboard.
@@ -29,8 +30,29 @@ export default function NavBar() {
           padding: "10px 0",
         }}
       >
-        <a href="/" className="title" style={{ fontWeight: 800 }}>
-          Trip Tracker
+        <a
+          href="/"
+          className="title"
+          style={{
+            fontWeight: 800,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+          title="Trip Tracker"
+        >
+          <img
+            src={appIcon}
+            alt=""
+            aria-hidden="true"
+            style={{
+              width: 24,
+              height: 24,
+              objectFit: "contain",
+              borderRadius: 6,
+            }}
+          />
+          <span>Trip Tracker</span>
         </a>
         <div style={{ display: "flex", gap: 10 }}>
           <a className="chip" href="/" title="Trip Tracker">
