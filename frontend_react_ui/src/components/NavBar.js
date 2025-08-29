@@ -2,7 +2,7 @@ import React from "react";
 import "../App.css";
 
 /**
- * Minimal top navigation bar with links to Trip Setup and Dashboard.
+ * Minimal top navigation bar with links to Trip Tracker and Dashboard.
  * Uses native anchors; App manages light client-side routing to avoid extra deps.
  */
 
@@ -24,10 +24,10 @@ export default function NavBar() {
         padding: "10px 0"
       }}>
         <a href="/" className="title" style={{ fontWeight: 800 }}>
-          Trip Setup
+          Trip Tracker
         </a>
         <div style={{ display: "flex", gap: 10 }}>
-          <a className="chip" href="/" title="Trip Setup">Setup</a>
+          <a className="chip" href="/" title="Trip Tracker">Tracker</a>
           <a className="chip" href="/dashboard" title="Dashboard">Dashboard</a>
         </div>
       </div>

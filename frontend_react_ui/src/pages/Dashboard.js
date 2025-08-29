@@ -192,8 +192,8 @@ export default function Dashboard() {
           </div>
 
           <div className="actions" style={{ marginTop: 18 }}>
-            <a className="btn-secondary" href="/" title="Back to Trip Setup">
-              ← Back to Trip Setup
+            <a className="btn-secondary" href="/" title="Back to Trip Tracker">
+              ← Back to Trip Tracker
             </a>
           </div>
         </div>
